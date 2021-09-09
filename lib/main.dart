@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:mahospital/provider/auth_model.dart';
-import 'package:mahospital/screen/login_screen.dart';
-import 'package:mahospital/screen/profile_screen.dart';
+import 'package:mahospital/routing/routes.dart';
+import 'provider/auth_model.dart';
+import 'screen/login_screen.dart';
+import 'screen/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'provider/pt_list.dart';
+import 'screen/signup_screen.dart';
+
+import '/constants/style.dart';
+import '/controllers/menu_controller.dart';
+import '/controllers/navigation_controller.dart';
+import '/layout.dart';
+import '/pages/404/error.dart';
+import '/pages/authentication/authentication.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +24,8 @@ void main() async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+  Get.put(MenuController());
+  Get.put(NavigationController());
   runApp(MyApp());
 }
 
@@ -21,52 +34,72 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(
-          value: PtList(),
-        ),
+    return GetMaterialApp(
+      initialRoute: authenticationPageRoute,
+      unknownRoute: GetPage(
+          name: '/not-found',
+          page: () => PageNotFound(),
+          transition: Transition.fadeIn),
+      getPages: [
+        GetPage(
+            name: rootRoute,
+            page: () {
+              return SiteLayout();
+            }),
+        GetPage(
+            name: authenticationPageRoute, page: () => AuthenticationPage()),
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          primarySwatch: Colors.blue,
-        ),
-        home: ChangeNotifierProvider<AuthModel>(
-          create: (_) => AuthModel(),
-          child: MaterialApp(
-            home: Consumer<AuthModel>(
-              builder: (_, auth, __) =>
-                  auth.isSignedIn ? ProfileScreen() : LoginScreen(),
-            ),
-          ),
-        ),
-        routes: {
-          '/profile': (context) => ProfileScreen(),
-          '/login': (context) => LoginScreen(),
-          // '/signup': (context) => SignupScreen(),
-          // '/realtime_test': (context) => RealtimeTest(),
-          // '/as_hosp': (context) => AsHospScreen(),
-          // '/as_dept': (context) => AsDeptScreen(),
-          // '/as_ward': (context) => AsWardScreen(),
-        },
-        onUnknownRoute: (RouteSettings settings) {
-          return MaterialPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) =>
-                Scaffold(body: Center(child: Text('Not Found'))),
-          );
-        },
+      debugShowCheckedModeBanner: false,
+      title: 'Dashboard',
+      theme: ThemeData(
+        scaffoldBackgroundColor: light,
+        textTheme: GoogleFonts.mulishTextTheme(Theme.of(context).textTheme)
+            .apply(bodyColor: Colors.black),
+        pageTransitionsTheme: PageTransitionsTheme(builders: {
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        }),
+        primarySwatch: Colors.blue,
       ),
+      // home: AuthenticationPage(),
     );
+    // return MultiProvider(
+    //   providers: [
+    //     ChangeNotifierProvider.value(
+    //       value: PtList(),
+    //     ),
+    //   ],
+    //   child: MaterialApp(
+    //     title: 'Flutter Demo',
+    //     theme: ThemeData(
+    //       primarySwatch: Colors.blue,
+    //     ),
+    //     // home: ChangeNotifierProvider<AuthModel>(
+    //     //   create: (_) => AuthModel(),
+    //     //   child: MaterialApp(
+    //     //     home: Consumer<AuthModel>(
+    //     //       builder: (_, auth, __) =>
+    //     //           auth.isSignedIn ? ProfileScreen() : LoginScreen(),
+    //     //     ),
+    //     //   ),
+    //     // ),
+    //     routes: {
+    //       '/': (context) => ProfileScreen(),
+    //       '/login': (context) => LoginScreen(),
+    //       '/signup': (context) => SignupScreen(),
+    //       // '/realtime_test': (context) => RealtimeTest(),
+    //       // '/as_hosp': (context) => AsHospScreen(),
+    //       // '/as_dept': (context) => AsDeptScreen(),
+    //       // '/as_ward': (context) => AsWardScreen(),
+    //     },
+    //     onUnknownRoute: (RouteSettings settings) {
+    //       return MaterialPageRoute<void>(
+    //         settings: settings,
+    //         builder: (BuildContext context) =>
+    //             Scaffold(body: Center(child: Text('Not Found'))),
+    //       );
+    //     },
+    //   ),
+    // );
   }
 }

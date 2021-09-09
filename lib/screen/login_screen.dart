@@ -1,11 +1,11 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'package:mahospital/provider/auth_model.dart';
-import 'package:provider/provider.dart';
+// import 'package:mahospital/provider/auth_model.dart';
+// import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -51,10 +51,15 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _isLoading = true;
         });
-        Provider.of<AuthModel>(context, listen: false)
-            .signIn(email: email, password: password);
-        // await _auth.signInWithEmailAndPassword(
-        //     email: email, password: password);
+        // Provider.of<AuthModel>(context, listen: false)
+        //     .signIn(email: email, password: password);
+        _auth
+            .signInWithEmailAndPassword(email: email, password: password)
+            .then((v) {
+          if (v.user != null) {
+            Navigator.of(context).pushReplacementNamed('/');
+          }
+        });
         setState(() {
           _isLoading = false;
         });
@@ -107,8 +112,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     textCapitalization: TextCapitalization.none,
                     key: ValueKey('email'),
-                    validator: EmailValidator(
-                        errorText: 'Please enter a valid email address'),
+                    validator: (v) {
+                      if (v!.length == 0)
+                        return 'Email please';
+                      else
+                        EmailValidator(
+                            errorText: 'Please enter a valid email address');
+                    },
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: 'Email address',
@@ -138,14 +148,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _tryLogin,
                       child: Text('Login'),
                     ),
-                  // if (!_isLoading)
-                  //   TextButton(
-                  //     style: TextButton.styleFrom(
-                  //         primary: Theme.of(context).primaryColor),
-                  //     onPressed: () =>
-                  //         Navigator.of(context).pushReplacementNamed('/signup'),
-                  //     child: Text('Create an account'),
-                  //   )
+                  if (!_isLoading)
+                    TextButton(
+                      style: TextButton.styleFrom(
+                          primary: Theme.of(context).primaryColor),
+                      onPressed: () =>
+                          Navigator.of(context).pushReplacementNamed('/signup'),
+                      child: Text('Create an account'),
+                    )
                 ],
               ),
             ),

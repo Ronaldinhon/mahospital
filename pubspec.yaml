@@ -31,7 +31,7 @@ dependencies:
   google_ml_kit: ^0.7.1 #77 firebase.google.com
   # firebase_database: ^7.1.1 #262 firebase.google.com
   # cloud_functions: ^3.0.2 #169 firebase.google.com
-  # image_picker: ^0.7.4 #2136 flutter.dev
+  image_picker: ^0.8.4 #2136 flutter.dev
   # camera: ^0.9.2+2 #602 flutter.dev
   # path_provider: ^2.0.1 #1631 flutter.dev
   provider: ^5.0.0 #4424 dash-overflow.net
@@ -63,6 +63,10 @@ dependencies:
 
   # dio: ^4.0.0 #2595 flutterchina.club
   # ndialog: ^4.1.0 #80 nizwar.id
+  google_fonts: ^2.1.0
+  charts_flutter: ^0.11.0
+  get: ^4.1.4
+  data_table_2: ^2.0.3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -85,9 +89,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/icons/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

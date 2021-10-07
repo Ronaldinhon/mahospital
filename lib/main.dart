@@ -1,31 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:mahospital/routing/routes.dart';
-import 'provider/auth_model.dart';
+import 'package:mahospital/screen/404/error.dart';
+import 'constants/firebase.dart';
+import 'controllers/auth_controller.dart';
+import 'controllers/list_all_ward_pt.dart';
+import 'controllers/list_current_ward_pts_controller.dart';
+import 'controllers/list_hosp_controller.dart';
+import 'controllers/list_user_controller.dart';
+import 'controllers/user_controller.dart';
+import 'helpers/auth_middleware.dart';
+import 'routing/routes.dart';
 import 'screen/login_screen.dart';
 import 'screen/profile_screen.dart';
-import 'package:provider/provider.dart';
-import 'provider/pt_list.dart';
-import 'screen/signup_screen.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '/constants/style.dart';
-import '/controllers/menu_controller.dart';
-import '/controllers/navigation_controller.dart';
-import '/layout.dart';
-import '/pages/404/error.dart';
-import '/pages/authentication/authentication.dart';
+// import '/controllers/menu_controller.dart';
+// import '/controllers/navigation_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  Get.put(MenuController());
-  Get.put(NavigationController());
+  await initialization.then((value) {
+    // Get.put(AppController());
+    // Get.put(MenuController());
+    // Get.put(NavigationController());
+    // Get.put(AuthController());
+    Get.put<AuthController>(AuthController(), permanent: true);
+    Get.put(UserController());
+    Get.put(HospListController());
+    Get.put(UserListController());
+    Get.put(AllWardPtListController());
+    Get.put(CurrentWardPtsListController());
+    // FirebaseFunctions.instanceFor(region: 'us-central1').useFunctionsEmulator('localhost', 5000);
+  });
   runApp(MyApp());
 }
 
@@ -35,22 +48,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialRoute: authenticationPageRoute,
+      initialRoute: loginPageRoute,
       unknownRoute: GetPage(
           name: '/not-found',
           page: () => PageNotFound(),
           transition: Transition.fadeIn),
       getPages: [
-        GetPage(
-            name: rootRoute,
-            page: () {
-              return SiteLayout();
-            }),
-        GetPage(
-            name: authenticationPageRoute, page: () => AuthenticationPage()),
+        GetPage(name: profilePageRoute, page: () => ProfileScreen(), middlewares: [AuthMiddleware()]),
+        GetPage(name: loginPageRoute, page: () => LoginScreen()),
       ],
       debugShowCheckedModeBanner: false,
-      title: 'Dashboard',
+      title: 'MaHospital',
       theme: ThemeData(
         scaffoldBackgroundColor: light,
         textTheme: GoogleFonts.mulishTextTheme(Theme.of(context).textTheme)
@@ -61,7 +69,7 @@ class MyApp extends StatelessWidget {
         }),
         primarySwatch: Colors.blue,
       ),
-      // home: AuthenticationPage(),
+      // home: Root(),
     );
     // return MultiProvider(
     //   providers: [

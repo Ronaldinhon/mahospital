@@ -12,6 +12,15 @@ const clientsPageRoute = "/clients";
 const authenticationPageDisplayName = "Log out";
 const authenticationPageRoute = "/auth";
 
+const loginPageDisplayName = "Login";
+const loginPageRoute = "/login";
+
+const profilePageDisplayName = "Profile";
+const profilePageRoute = "/profile";
+
+// const authenticationPageDisplayName = "Log out";
+// const errorPageRoute = "/404";
+
 class MenuItem {
   final String name;
   final String route;
@@ -19,11 +28,9 @@ class MenuItem {
   MenuItem(this.name, this.route);
 }
 
-
-
 List<MenuItem> sideMenuItemRoutes = [
- MenuItem(overviewPageDisplayName, overviewPageRoute),
- MenuItem(driversPageDisplayName, driversPageRoute),
- MenuItem(clientsPageDisplayName, clientsPageRoute),
- MenuItem(authenticationPageDisplayName, authenticationPageRoute),
+  MenuItem(overviewPageDisplayName, overviewPageRoute),
+  MenuItem(driversPageDisplayName, driversPageRoute),
+  MenuItem(clientsPageDisplayName, clientsPageRoute),
+  MenuItem(authenticationPageDisplayName, authenticationPageRoute),
 ];

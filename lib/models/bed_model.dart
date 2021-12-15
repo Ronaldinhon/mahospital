@@ -11,7 +11,8 @@ class BedModel {
   late String id;
   late String name;
   late bool active;
-  // late bool occupied; //need?
+  late bool o2;
+  // late bool occupied; // need?
   late String hospId;
   late String deptId;
   late String wardId;
@@ -21,17 +22,20 @@ class BedModel {
   bool ptInitialised = false;
   bool error = false;
 
+  BedModel();
+
   BedModel.fromSnapshot(DocumentSnapshot snapshot) {
     try {
       name = snapshot.get('name');
       active = snapshot.get('active');
+      o2 = snapshot.get('o2');
       hospId = snapshot.get('hospId');
       deptId = snapshot.get('deptId');
       wardId = snapshot.get('wardId');
-      ptId = snapshot.get('ptId') ?? '';
+      ptId = snapshot.get('ptId') ?? ''; //work? should work ba
       lastUpdatedBy = snapshot.get('lastUpdatedBy');
       id = snapshot.id;
-      if (ptId.isNotEmpty) getPtModel(); // not yet create wardPt in firebase
+      // if (ptId.isNotEmpty) getPtModel(); // not yet create wardPt in firebase
     } catch (e) {
       Get.snackbar(
         "Error retrieving bed data",
@@ -42,13 +46,18 @@ class BedModel {
     }
   }
 
-  void getPtModel() async {
+  Future<WardPtModel> getPtModel() async {
     // DocumentSnapshot<Object?> wpo = await wardPtRef.doc(ptId).get();
-    try {
-      wardPtModel = await allWardPtListController.createAndReturn(ptId);
-      ptInitialised = true;
-    } catch (e) {
-      error = false;
-    }
+    // try {
+    //   if (ptId.isNotEmpty) {
+        // wardPtModel = await allWardPtListController.createAndReturn(ptId);
+        wardPtModel = WardPtModel.fromSnapshot(await wardPtRef.doc(ptId).get());
+        ptInitialised = true;
+        return wardPtModel;
+    //   }
+    // } catch (e) {
+    //   print(e.toString());
+    //   error = true;
+    // }
   }
 }

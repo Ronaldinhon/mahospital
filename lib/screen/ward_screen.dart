@@ -6,6 +6,7 @@ import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 
 import 'package:flutter/material.dart';
+import 'package:mahospital/helpers/reponsiveness.dart';
 import 'package:mahospital/helpers/show_loading.dart';
 import 'package:mahospital/models/bed_model.dart';
 import 'package:mahospital/models/dept_model.dart';
@@ -13,6 +14,7 @@ import 'package:mahospital/models/ward_model.dart';
 import 'package:mahospital/models/ward_pt_model.dart';
 import '/widget/bed_list_tile.dart';
 import 'as_bed_screen.dart';
+import 'bed_screen.dart';
 
 class WardScreen extends StatefulWidget {
   final WardModel ward;
@@ -27,7 +29,7 @@ class _WardScreenState extends State<WardScreen> {
   late DocumentSnapshot<Object?> ward;
   late List<BedModel> localBedModels;
   late List<WardPtModel> localWardPtModels;
-  late List<BedListTile> bedTiles;
+  // late List<BedListTile> bedTiles;
   late WardModel wardModel;
 
   List<WardPtModel> wpModels = [];
@@ -36,9 +38,7 @@ class _WardScreenState extends State<WardScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     wardModel = widget.ward;
-    print(wardModel.bedIdList);
     super.initState();
   }
 
@@ -50,12 +50,23 @@ class _WardScreenState extends State<WardScreen> {
     //   return bedRef.where('wardId', isEqualTo: qward.id).get();
     // });
     // wardModel = widget.ward;
-    localWardPtModels = await wardModel.getPts();
+
+    // localWardPtModels = await wardModel.getPts(); // this 1 no need ba
+
     if (wardModel.bedIdList.isNotEmpty) {
-      var locodels = await wardModel.getBeds();
+      var locodels = await wardModel.getBeds(); // is already in sequence
       localBedModels = locodels;
-      // return createBedsList(locodels);
-      return [];
+      for (var lbm in localBedModels) {
+        if (lbm.ptId.isNotEmpty) {
+          await lbm.getPtModel();
+        }
+      }
+      // localBedModels.forEach((bm) async {
+      //   if (bm.ptId.isNotEmpty) {
+      //     await bm.getPtModel();
+      //   }
+      // });
+      return createBedsList(locodels);
     } else
       return [];
     // return localBedModels;
@@ -64,33 +75,40 @@ class _WardScreenState extends State<WardScreen> {
   List<BedListTile> createBedsList(List<BedModel> bedModelList) {
     List<BedListTile> wBeds = [];
     if (bedModelList.isNotEmpty) {
+      var prevWardPtId;
       bedModelList.asMap().forEach((index, bedModel) {
         if (bedModel.active) {
+          // if (bedModel.ptId.isNotEmpty) {
+          //   wpModels.add(bedModel.wardPtModel);
+          //   prevWardPtId = bedModel.ptId;
+          // }
+          // print(bedModel.ptId.isNotEmpty ? bedModel.wardPtModel : 'empty');
           BedListTile bedTile = BedListTile(
             bedModel,
+            wardModel,
             index,
+            prevWardPtId,
           );
-          if (bedModel.ptId.isNotEmpty) wpModels.add(bedModel.wardPtModel);
           wBeds.add(bedTile);
         }
       });
-      currentWardPtsListController.setCurrentPtsList(wpModels);
+      // currentWPLC.setCurrentPtsList(wpModels);
       // Provider.of<PtList>(context, listen: false).setList(ptIds);
     }
     return wBeds;
   }
 
   void updateWM() async {
-    // update ward model
+    // update ward model - or maybe just use setState and getBedsForWS() again next time
     showLoading();
-    var wmFirebase = await wardRef.doc(wardModel.imageUrl).get();
+    var wmFirebase = await wardRef.doc(wardModel.id).get();
     WardModel wm = WardModel.fromSnapshot(wmFirebase);
     DeptModel dept = userController.user.userDepts
         .firstWhere((dept) => dept.id == wm.deptId);
     dept.wardModels.removeWhere((owm) => owm.id == wm.id);
     dept.wardModels.add(wm);
     dismissLoadingWidget();
-    Get.off(WardScreen(wm));
+    Get.off(WardScreen(wm), preventDuplicates: false);
   }
 
   @override
@@ -100,7 +118,6 @@ class _WardScreenState extends State<WardScreen> {
         builder:
             (BuildContext context, AsyncSnapshot<List<BedListTile>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            print(snapshot);
             return Scaffold(
                 key: _scaffoldKey,
                 appBar: AppBar(
@@ -123,10 +140,10 @@ class _WardScreenState extends State<WardScreen> {
                               children: [
                                 ElevatedButton(
                                     child: Text('Refresh'),
-                                    onPressed: () => updateWM()
+                                    // onPressed: () => updateWM()
+                                    onPressed: () => setState(() {})
                                     // async {
                                     //   showLoading();
-
                                     //   Navigator.of(context).pushReplacement(
                                     //     MaterialPageRoute(
                                     //       builder: (c) {
@@ -169,6 +186,8 @@ class _WardScreenState extends State<WardScreen> {
                                     color: Colors.black,
                                   ),
                                   onPressed: () {
+                                    // Get.to(BedScreen(wardModel));
+                                    Get.to(AsBedScreen(wardModel));
                                     // Navigator.push(
                                     //   context,
                                     //   MaterialPageRoute(
@@ -185,14 +204,25 @@ class _WardScreenState extends State<WardScreen> {
                               ),
                             if (snapshot.data!.isNotEmpty)
                               ConstrainedBox(
-                                constraints: BoxConstraints(maxHeight: 300),
-                                child: ListView(
-                                  shrinkWrap: true,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  children: <Widget>[...?snapshot.data],
-                                ),
-                              )
+                                  constraints: BoxConstraints(maxHeight: 300),
+                                  child: GridView(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount:
+                                          ResponsiveWidget.isSmallScreen(
+                                                  context)
+                                              ? 2
+                                              : 3,
+                                    ),
+                                    children: <Widget>[...?snapshot.data],
+                                  )
+                                  // ListView(
+                                  //   shrinkWrap: true,
+                                  //   padding: const EdgeInsets.symmetric(
+                                  //       horizontal: 10),
+                                  //   children: <Widget>[...?snapshot.data],
+                                  // ),
+                                  )
                           ],
                         ),
                       ),

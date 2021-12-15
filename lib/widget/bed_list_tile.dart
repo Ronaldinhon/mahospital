@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/models/bed_model.dart';
+import 'package:mahospital/models/ward_model.dart';
+import 'package:mahospital/screen/bed_screen.dart';
+import 'package:mahospital/screen/pt_screen.dart';
 
 class BedListTile extends StatelessWidget {
   final BedModel wBed;
+  final WardModel wModel;
   final int index;
+  final String? prevWardPtId;
 
-  BedListTile(this.wBed, this.index, {Key? key}) : super(key: key);
+  BedListTile(this.wBed, this.wModel, this.index, this.prevWardPtId, {Key? key})
+      : super(key: key);
 
 //   @override
 //   _BedListTileState createState() => _BedListTileState();
@@ -20,50 +26,90 @@ class BedListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     String ptDetails = wBed.ptInitialised ? wBed.wardPtModel.ptDetails() : '-';
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.85,
-      ),
-      child: Container(
-        margin: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-            border: Border.all(
-              width: 1,
+    return Container(
+      margin: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+          color: wBed.ptInitialised ? Colors.redAccent[400] : Colors.lightGreen,
+          border: Border.all(
+            width: 1,
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(8))),
+      width: 1000,
+      child: GestureDetector(
+        onTap: () {
+          // if (prevWardPtId !=
+          //     null) // so that we know which position to add pt into later in bedScreen - haiz
+          //   currentWPLC.setCurrentIndexByPtId(prevWardPtId!);
+          if (wBed.ptInitialised) {
+            currentWPLC.cbm.value = wBed;
+            currentWPLC.cwpm.value = wBed.wardPtModel;
+          }
+
+          wBed.ptInitialised
+              ? Get.to(PtScreen())
+              : !wBed.error
+                  ? Get.to(BedScreen(wBed, wModel))
+                  : Get.snackbar(
+                      "Error retrieving patient data",
+                      'Please refresh ward page.',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                    );
+        },
+        child: GridTile(
+          // header:
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  wBed.name,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+                SizedBox(
+                  height: 4,
+                ),
+                RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'O2 Port: ',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                      wBed.o2
+                          ? WidgetSpan(
+                              child: Icon(
+                                Icons.check_box,
+                                color: Colors.black,
+                                size: 18,
+                              ),
+                            )
+                          : WidgetSpan(
+                              child: Icon(
+                                Icons.check_box_outline_blank,
+                                color: Colors.black,
+                                size: 18,
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text('Pt: '), Expanded(child: Text(ptDetails))],
+                ),
+              ],
             ),
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        width: 1000,
-        child: ListTile(
-          title: Text(wBed.name),
-          subtitle: Text('Pt: ' + ptDetails),
-          onTap: () {
-            currentWardPtsListController.setCurrentIndex(index);
-
-
-            // wBed.ptInitialised
-            //     ? Get.to(PtScreen())
-            //     : !wBed.error
-            //         ? Get.to(BedScreen(wBed))
-            //         : Get.snackbar(
-            //             "Error retrieving paatient data",
-            //             'Please refresh ward page.',
-            //             snackPosition: SnackPosition.BOTTOM,
-            //             backgroundColor: Colors.red,
-            //           );
-
-
-            // Provider.of<PtList>(context, listen: false)
-            //     .setCurrentIndex(index);
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => wBed['occupied']
-            //         ? PtScreen(
-            //           // wBed['ptId'], wBed.id, wBed['wardId']
-            //           )
-            //         : BedScreen(wBed, ward, ward['deptId']),
-            //   ),
-            // );
-          },
+          ),
+          // child: SizedBox(
+          //   width: 500,
+          //   height: 500,
+          // )
         ),
       ),
     );

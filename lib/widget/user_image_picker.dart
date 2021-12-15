@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:html' as html;
+// import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

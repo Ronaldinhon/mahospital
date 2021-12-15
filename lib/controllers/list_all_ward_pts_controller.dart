@@ -19,11 +19,13 @@ class AllWardPtListController extends GetxController {
   void addWardPt(WardPtModel value) => this._wardPtModelList.add(value);
 
   Future<WardPtModel> createAndReturn(String hospId) async {
+    print('it came here');
     if (ptIdInCont(hospId))
       return wardPtModel(hospId);
     else {
       DocumentSnapshot<Object?> hosp = await wardPtRef.doc(hospId).get();
       var hospModel = WardPtModel.fromSnapshot(hosp);
+      print(hospModel);
       addWardPt(hospModel);
       return hospModel;
     }

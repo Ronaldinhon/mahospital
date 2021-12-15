@@ -19,6 +19,7 @@ class UserModel {
   late String createPlatform;
   late DateTime createdAt;
   late DateTime updatedAt;
+  bool deptInitialised = false;
 
   UserModel();
 
@@ -32,10 +33,12 @@ class UserModel {
       reg = snapshot.get('reg');
       verified = snapshot.get('verified');
       verifiedBy = snapshot.get('verifiedBy') ?? '';
-      createdAt = DateTime.fromMillisecondsSinceEpoch(snapshot.get('createdAt')) ;
-      updatedAt = DateTime.fromMillisecondsSinceEpoch(snapshot.get('updatedAt'));
+      createdAt =
+          DateTime.fromMillisecondsSinceEpoch(snapshot.get('createdAt'));
+      updatedAt =
+          DateTime.fromMillisecondsSinceEpoch(snapshot.get('updatedAt'));
       id = snapshot.id;
-      deptListFromDeptIds();
+      deptList();
       // initialized = true;
     } catch (e) {
       Get.snackbar(
@@ -47,11 +50,21 @@ class UserModel {
     }
   }
 
-  void deptListFromDeptIds() async {
-    List<DeptModel> emptyToFull = [];
-    QuerySnapshot<Object?> deptObjs =
-        await deptRef.where('members', arrayContainsAny: [id]).get();
-    deptObjs.docs.forEach((v) => emptyToFull.add(DeptModel.fromSnapshot(v)));
-    userDepts = emptyToFull;
+  Future<List> deptList() async {
+    if (deptInitialised)
+      return userDepts;
+    else {
+      List<DeptModel> emptyToFull = [];
+      QuerySnapshot<Object?> deptObjs =
+          await deptRef.where('members', arrayContainsAny: [id]).get();
+      deptObjs.docs.forEach((v) => emptyToFull.add(DeptModel.fromSnapshot(v)));
+      userDepts = emptyToFull;
+      deptInitialised = true;
+      return emptyToFull;
+    }
+  }
+
+  Future<bool> veri() async {
+    return verified;
   }
 }

@@ -18,6 +18,8 @@ const loginPageRoute = "/login";
 const profilePageDisplayName = "Profile";
 const profilePageRoute = "/profile";
 
+const asHospPageRoute = "/as_hosp";
+
 // const authenticationPageDisplayName = "Log out";
 // const errorPageRoute = "/404";
 

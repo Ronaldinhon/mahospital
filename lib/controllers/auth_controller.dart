@@ -45,6 +45,7 @@ class AuthController extends GetxController {
   }
 
   void _setInitialScreen(User? user) {
+    // auth.setPersistence(Persistence.SESSION);
     if (user == null) {
       Get.offAll(() => LoginScreen());
     } else if (!user.emailVerified) {
@@ -117,7 +118,7 @@ class AuthController extends GetxController {
   //   }
   // }
 
-  void signIn() async {
+  Future<bool> signIn() async {
     try {
       await auth
           .signInWithEmailAndPassword(
@@ -125,6 +126,7 @@ class AuthController extends GetxController {
           .then((result) {
         _clearControllers();
       });
+      return true;
     } catch (e) {
       Get.snackbar(
         "Sign In Failed",
@@ -132,6 +134,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
       );
+      return false;
     }
   }
 

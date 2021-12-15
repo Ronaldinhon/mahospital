@@ -2,8 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
+import 'package:mahospital/constants/firebase.dart';
 import 'package:mahospital/helpers/reponsiveness.dart';
 import 'package:mahospital/models/dept_model.dart';
+import 'package:mahospital/screen/login_screen.dart';
 import '/controllers/auth_controller.dart';
 import '/screen/dept_screen.dart';
 
@@ -26,21 +28,14 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
   // Future<QuerySnapshot<Object>> getUserDept() async {
   //   QuerySnapshot<Object> deptObjs =
   //       await depts.where('members', arrayContainsAny: [user.uid]).get();
-  //   print(deptObjs.docs.length);
-  //   print('alksjlaslkjajlas');
   //   return deptObjs;
   // }
 
   ListTile produceTile(BuildContext context, String title, String route) {
     return ListTile(
       title: Text(title),
-      onTap: () => widget.currentPage == route
-          ?
-          // Navigator.pop(context)
-          Get.back()
-          :
-          // Navigator.of(context).pushReplacementNamed('/' + route),
-          Get.offNamed('/' + route),
+      onTap: () =>
+          widget.currentPage == route ? Get.back() : Get.offNamed('/' + route),
       tileColor: widget.currentPage == route
           ? Theme.of(context).primaryColorLight
           : null,
@@ -52,7 +47,7 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
       title: Text(title),
       onTap: () => widget.currentPage == deptId //need change?
           ? Get.back()
-          : Get.off(DeptScreen(deptId, dm)),
+          : Get.off(DeptScreen(dm), preventDuplicates: false),
       tileColor: widget.currentPage == deptId
           ? Theme.of(context).primaryColorLight
           : null,
@@ -81,7 +76,30 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
                 tileColor: Theme.of(context).primaryColor,
               ),
               produceTile(context, 'Profile', 'profile'),
-              produceTile(context, 'Add / Search Hospital', 'as_hosp'),
+              !userController.user.verified
+                  ? Container()
+                  : produceTile(context, 'Add / Search Hospital', 'as_hosp'),
+              FutureBuilder(
+                future: userController.user.deptList(),
+                builder:
+                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return userController.user.verified
+                        ? ExpansionTile(
+                            title: Text('Departments'),
+                            children: userController.user.userDepts
+                                .map((d) => deptTile(
+                                    '${d.shortName} (${d.hospShortName})',
+                                    d.id,
+                                    d))
+                                .toList(),
+                          )
+                        : Container();
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
               // Obx(() => ac.userModel.value.userDepts.forEach(f)),
               // FutureBuilder<QuerySnapshot<Object>>(
               //   future: getUserDept(),
@@ -97,16 +115,9 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
               //               '${deptMap['shortName']} (${hosp['shortName']})',
               //               deptMap.id));
               //         });
-              //         // print(deptTile.length);
               //         return
-              ExpansionTile(
-                title: Text('Departments'),
-                children: userController.user.userDepts
-                    .map((d) => deptTile(
-                        '${d.shortName} (${d.hospShortName})', d.id, d))
-                    .toList(),
-              ),
               // ;
+
               //       } else {
               //         return Container();
               //       }
@@ -124,16 +135,18 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
               //     }
               //   },
               // ),
-              ListTile(
-                title: Text('Realtime Testing page'),
-                onTap: () => Navigator.of(context)
-                    .pushReplacementNamed('/realtime_test'),
-              ),
+
+              // ListTile(
+              //   title: Text('Realtime Testing page'),
+              //   onTap: () => Navigator.of(context)
+              //       .pushReplacementNamed('/realtime_test'),
+              // ),
+
               ListTile(
                 title: Text('Logout'),
                 onTap: () {
-                  FirebaseAuth.instance.signOut();
-                  Navigator.of(context).pushReplacementNamed('/auth');
+                  auth.signOut();
+                  Get.offAll(LoginScreen());
                 },
               )
             ],

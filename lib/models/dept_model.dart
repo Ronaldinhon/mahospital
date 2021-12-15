@@ -22,10 +22,12 @@ class DeptModel {
   late List<WardModel> wardModels;
   late HospModel hospModel;
   late bool verified;
+  bool membersInitialised = false;
+  bool wardsInitialised = false;
 
-  DeptModel.fromSnapshot(DocumentSnapshot snapshot) {
+  DeptModel.fromSnapshot(DocumentSnapshot snapshot, {bool guaw: true}) {
+    //get user and ward
     try {
-      // print(snapshot.toString());
       name = snapshot.get('name');
       shortName = snapshot.get('shortName');
       hospId = snapshot.get('hospId');
@@ -35,8 +37,10 @@ class DeptModel {
       members = snapshot.get('members');
       id = snapshot.id;
       getHospName(hospId);
-      getUserModels();
-      getWards(id);
+      if (guaw) {
+        getUserModels();
+        getWards();
+      }
       // getUserModel
       // initialized = true;
     } catch (e) {
@@ -55,15 +59,27 @@ class DeptModel {
     hospShortName = hospModel.shortName;
   }
 
-  void getUserModels() async {
-    memberModels = userListController.createAndReturnForDept(members);
+  Future<List<UserModel>> getUserModels() async {
+    if (membersInitialised)
+      return memberModels;
+    else {
+      memberModels = userListController.createAndReturnForDept(members);
+      membersInitialised = true;
+      return memberModels;
+    }
   }
 
-  void getWards(String deptId) async {
-    List<WardModel> emptyToFull = [];
-    QuerySnapshot<Object?> wardObjs =
-        await wardRef.where('deptId', isEqualTo: deptId).get();
-    wardObjs.docs.forEach((wo) => emptyToFull.add(WardModel.fromSnapshot(wo)));
-    wardModels = emptyToFull;
+  Future<List<WardModel>> getWards() async {
+    if (wardsInitialised)
+      return wardModels;
+    else {
+      List<WardModel> emptyToFull = [];
+      QuerySnapshot<Object?> wardObjs =
+          await wardRef.where('deptId', isEqualTo: id).get();
+      wardObjs.docs
+          .forEach((wo) => emptyToFull.add(WardModel.fromSnapshot(wo)));
+      wardModels = emptyToFull;
+      return wardModels;
+    }
   }
 }

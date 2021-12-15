@@ -26,23 +26,22 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _repFormKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late firebase_storage.Reference storageRef;
   final AuthController aC = authController;
+  bool _isLoadingReport = false;
 
   late String cPassword;
   late String cEmail;
   final HttpsCallable checkReg = FirebaseFunctions.instance.httpsCallable(
     'checkReg',
   );
-  // late String errorMessage;
-  // late String email;
-  // late String password;
-  // late String name;
-  // late String shortName;
-  // late String title;
-  // late int reg;
-  // File imageFile = File('');
+
+  TextEditingController remail = TextEditingController();
+  TextEditingController rtitle = TextEditingController();
+  TextEditingController rreg = TextEditingController();
+  TextEditingController rreport = TextEditingController();
 
   static List<String> _dropdownTitles = [
     'Dr',
@@ -55,6 +54,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void initState() {
     aC.title.text = '';
+    rtitle.text = '';
     super.initState();
   }
 
@@ -114,7 +114,6 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _trySubmit() async {
-    // FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
     final isValid = _formKey.currentState!.validate();
     _formKey.currentState!.save();
@@ -184,7 +183,6 @@ class _SignupScreenState extends State<SignupScreen> {
             'upperName': aC.name.text.toUpperCase(),
             'reg': int.parse(aC.reg.text)
           }).then((v) {
-            // print(v);
             if (v.data) {
               Get.snackbar(
                 'Valid Credentials',
@@ -223,10 +221,158 @@ class _SignupScreenState extends State<SignupScreen> {
         );
         setState(() => _isLoading = false);
       }
-      // setState(() {
-      //   _isLoading = !_isLoading;
-      // });
     }
+  }
+
+  void _trySubmitReport() async {
+    setState(() => _isLoadingReport = true);
+    final isValid = _repFormKey.currentState!.validate();
+    _repFormKey.currentState!.save();
+
+    if (remail.text.isEmpty) {
+      Get.snackbar(
+        'Missing Email',
+        'Please fill in emails.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+      );
+      setState(() => _isLoadingReport = false);
+      return;
+    }
+
+    if (isValid) {
+      try {
+        repRef.add({
+          'email': remail.text,
+          'title': rtitle.text,
+          'reg': int.parse(rreg.text),
+          'report': rreport.text,
+        }).then((v) => Get.snackbar(
+              'Report Submitted',
+              'Please wait for Admin\'s reply.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.blue,
+            ));
+        rtitle.text = '';
+        remail.clear();
+        rreg.clear();
+        rreport.clear();
+        setState(() => _isLoadingReport = false);
+        Get.back();
+        // _submitReport();
+      } catch (e) {
+        Get.snackbar(
+          'Report Error',
+          'Try again or contact admin.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+        );
+        setState(() => _isLoadingReport = false);
+        Get.back();
+      }
+    }
+  }
+
+  void showReportDialog() {
+    Get.defaultDialog(
+        title: "Report",
+        content: Form(
+          key: _repFormKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              UserImagePicker(_pickedImage),
+              DisableShortcut(
+                child: TextFormField(
+                  textCapitalization: TextCapitalization.none,
+                  key: ValueKey('remail'),
+                  enableInteractiveSelection: false,
+                  toolbarOptions: ToolbarOptions(
+                    copy: false,
+                    paste: false,
+                  ),
+                  validator: EmailValidator(
+                      errorText: 'Please enter a valid email address'),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email address',
+                  ),
+                  onSaved: (value) {
+                    remail.text = value!.trim();
+                  },
+                ),
+              ),
+              DropdownButtonFormField<String>(
+                key: ValueKey('rtitle'),
+                decoration: InputDecoration(
+                  hoverColor: Theme.of(context).primaryColor,
+                  labelText: 'Title',
+                ),
+                value: rtitle.text,
+                validator: (String? val) {
+                  if (val!.trim().isEmpty) {
+                    return 'Title is required!';
+                  }
+                },
+                onChanged: (String? newValue) {
+                  setState(() {
+                    rtitle.text = newValue!;
+                  });
+                },
+                items: _dropdownTitles.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              TextFormField(
+                key: ValueKey('rreg'),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (val) {
+                  if (val!.trim().isEmpty) {
+                    return 'Registration Number is required!';
+                  } else if (val.trim().length < 5) {
+                    return 'Registration Number must be at least 5 characters long';
+                  }
+                  return null;
+                },
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'MMC / LJM no.',
+                ),
+                onSaved: (value) {
+                  rreg.text = value!;
+                },
+              ),
+              TextFormField(
+                key: ValueKey('rreport'),
+                validator: (val) {
+                  if (val!.trim().isEmpty) {
+                    return 'Description is required!';
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                ),
+                onSaved: (value) {
+                  rreport.text = value!.trim();
+                },
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              if (_isLoadingReport) CircularProgressIndicator(),
+              if (!_isLoadingReport)
+                ElevatedButton(
+                  onPressed: _trySubmitReport,
+                  child: Text('Report'),
+                ),
+            ],
+          ),
+        ),
+        barrierDismissible: true);
   }
 
   @override
@@ -235,17 +381,22 @@ class _SignupScreenState extends State<SignupScreen> {
       appBar: AppBar(
         title: Text('Signup'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.report),
-            onPressed: () async {
-              await checkReg.call(<String, dynamic>{
-                'url':
-                    'https://meritsmmc.moh.gov.my/search/registeredDoctor?name=' +
-                        'stanley choo shen hong'.split(' ').join('+'),
-                'upperName': 'stanley choo shen hong'.toUpperCase(),
-                'reg': 85265
-              }).then((v) => print(v.data));
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: IconButton(
+              icon: Icon(Icons.report),
+              onPressed: () => showReportDialog()
+              // () async {
+              //   await checkReg.call(<String, dynamic>{
+              //     'url':
+              //         'https://meritsmmc.moh.gov.my/search/registeredDoctor?name=' +
+              //             'stanley choo shen hong'.split(' ').join('+'),
+              //     'upperName': 'stanley choo shen hong'.toUpperCase(),
+              //     'reg': 85265
+              //   }).then((v) => print(v.data));
+              // }
+              ,
+            ),
           )
         ],
       ),
@@ -458,7 +609,6 @@ class _SignupScreenState extends State<SignupScreen> {
 //       "Access-Control-Allow-Origin": "*",
 //       "Accept": "application/json"
 //     });
-// print('here');
 // var upperName = name.trim().toUpperCase();
 // List<String> lines = LineSplitter.split(response.body).toList();
 // var nameLine = lines.firstWhere((line) => line.contains(upperName));

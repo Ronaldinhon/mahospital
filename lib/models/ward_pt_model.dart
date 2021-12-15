@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
+import 'package:intl/intl.dart';
 
 import 'hosp_model.dart';
 
 class WardPtModel {
   late String id;
   late String initial;
-  late int birthDate; //save as int ba
+  late String birthDate; //save as int ba
   late int genderIndex;
+  late String gender;
   late String race;
+  late String nickName;
+  late String address;
   late List<String> rNos;
 
   late List<String> activeDepts;
@@ -21,7 +25,7 @@ class WardPtModel {
 
   late String base16rmd;
   late String random32;
-  late String fullName;
+  late String name;
   late String icNumber;
   bool decoded = false;
 
@@ -45,24 +49,38 @@ class WardPtModel {
 
   WardPtModel.fromSnapshot(DocumentSnapshot snapshot) {
     try {
-      
+      id = snapshot.id;
+      initial = snapshot.get('initial');
+      name = snapshot.get('name');
+      icNumber = snapshot.get('ic');
+      birthDate = snapshot.get('dob');
+      genderIndex = snapshot.get('gender');
+      race = snapshot.get('race');
+      nickName = snapshot.get('nickName');
+      address = snapshot.get('address');
+      List<dynamic> rns = snapshot.get('rn');
+      rNos = rns.map((rn) => rn.toString()).toList();
+// activeDepts
+// inactiveDepts
+// if member of hosp then can see ba
+      wardId = snapshot.get('wardId');
+      base16rmd = snapshot.get('base16rmd');
+      random32 = snapshot.get('random32');
     } catch (e) {
-      Get.snackbar(
-        "Error retrieving patient data",
-        e.toString() + ' Please refresh ward page.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 5)
-      );
+      Get.snackbar("Error retrieving patient data",
+          e.toString() + ' Please refresh ward page.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5));
     }
   }
 
   String ptDetails() {
     int age = DateTime.now()
-            .difference(DateTime.fromMicrosecondsSinceEpoch(birthDate))
+            .difference(DateFormat('dd/MM/yyyy').parse(birthDate))
             .inDays ~/
         365;
-    String gender;
+
     switch (genderIndex) {
       case 0:
         gender = 'Male';
@@ -73,6 +91,11 @@ class WardPtModel {
       default:
         gender = 'Agender';
     }
-    return '$initial, ${age}yo $race $gender';
+    return '${name.capitalize}, ${age}yo ${race.capitalize} $gender';
+  }
+
+  void setQrCred(String name, String iC) {
+    name = name;
+    icNumber = iC;
   }
 }

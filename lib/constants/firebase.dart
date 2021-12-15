@@ -24,5 +24,7 @@ final isWebMobile = kIsWeb &&
 CollectionReference drRef = ffi.collection('drId');
 CollectionReference snRef = ffi.collection('snId');
 FirebaseStorage storage = FirebaseStorage.instance;
+CollectionReference repRef = ffi.collection('reports');
+CollectionReference appHospRef = ffi.collection('approvedHospId');
 // final FirebaseFunctions fbFunctions = FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
 // fbFunctions.useFunctionsEmulator(origin: 'http://localhost:5000');

@@ -59,12 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
   //   });
   // }
 
-  void _tryLogin() {
+  void _tryLogin() async {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
-      authController.signIn();
+      if (await authController.signIn()) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -73,6 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
   //   userStream
   //   super.dispose();
   // }
+
+  final focus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +107,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Email address',
                       ),
+                      onFieldSubmitted: (v) {
+                        FocusScope.of(context).requestFocus(focus);
+                      },
+                      // onFieldSubmitted: (val) => _tryLogin(),
                     ),
                     TextFormField(
+                      focusNode: focus,
                       controller: authController.password,
                       keyboardType: TextInputType.number,
                       key: ValueKey('password'),
@@ -115,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           labelText: 'Password', hintText: 'Numbers only'),
                       // autofillHints: ['Only numbers'],
                       obscureText: true,
+                      onFieldSubmitted: (val) => _tryLogin(),
                     ),
                     SizedBox(
                       height: 15,

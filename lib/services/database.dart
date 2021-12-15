@@ -13,7 +13,6 @@ class Database {
       });
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -25,7 +24,6 @@ class Database {
 
       return UserModel.fromDocumentSnapshot(documentSnapshot: _doc);
     } catch (e) {
-      print(e);
       rethrow;
     }
   }

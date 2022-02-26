@@ -142,7 +142,7 @@ class _AsHospScreenState extends State<AsHospScreen> {
         'state': state,
         'district': district,
         'ownerId': uid,
-        'members': [],
+        'members': [uid],
         'verified': false,
         'verifiedBy': null,
         'createdAt': DateTime.now().millisecondsSinceEpoch,
@@ -274,7 +274,7 @@ class _AsHospScreenState extends State<AsHospScreen> {
                               onChanged: (HospModel? newValue) {
                                 Get.to(HospScreen(newValue!));
                               },
-                              items: hospitals.map((HospModel value) {
+                              items: snapshot.data!.map((HospModel value) {
                                 return DropdownMenuItem<HospModel>(
                                   value: value,
                                   child: ConstrainedBox(
@@ -382,7 +382,7 @@ class _AsHospScreenState extends State<AsHospScreen> {
                         value: state,
                         validator: (String? val) {
                           if (val!.trim().isEmpty) {
-                            return 'Title is required!';
+                            return 'State is required!';
                           }
                         },
                         // RequiredValidator(

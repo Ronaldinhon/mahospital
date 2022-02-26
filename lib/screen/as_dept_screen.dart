@@ -125,6 +125,7 @@ class _AsDeptScreenState extends State<AsDeptScreen> {
         'ownerId': uid,
         'members': [uid],
         'hospId': hospital.id,
+        'hospShortName': hospital.shortName,
         'verified': false,
         'verifiedBy': null,
         'createdAt': DateTime.now().millisecondsSinceEpoch,
@@ -212,9 +213,9 @@ class _AsDeptScreenState extends State<AsDeptScreen> {
                       keyboardType: TextInputType.name,
                       validator: (val) {
                         if (val!.trim().isEmpty) {
-                          return 'Short name is required!';
+                          return 'Short Name is required!';
                         } else if (val.trim().length > 9) {
-                          return 'Short name must be 8 characters or shorter';
+                          return 'Short Name must be 8 characters or shorter';
                         }
                         return null;
                       },

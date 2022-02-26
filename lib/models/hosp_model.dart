@@ -39,7 +39,7 @@ class HospModel {
     }
   }
 
-  // call from hosp screen
+  // call from hosp screen - not link to deptListController yet
   Future<List<DeptModel>> getDeptList() async {
     List<DeptModel> emptyToFull = [];
     QuerySnapshot<Object?> deptObjs =
@@ -47,12 +47,11 @@ class HospModel {
     deptObjs.docs.forEach(
         (v) => emptyToFull.add(DeptModel.fromSnapshot(v, guaw: false)));
     deptModels = emptyToFull;
-    print(deptModels.length);
     return deptModels;
   }
 
-  void getHospMemberModels(String hospId) {
-    memberModels = userListController.createAndReturnForDept(members);
+  Future<void> getHospMemberModels(String hospId) async { // currently not in use
+    memberModels = await userListController.createAndReturnForDept(members);
   }
 
   String getName() {

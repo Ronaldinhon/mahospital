@@ -24,6 +24,8 @@ class WardModel {
   bool bedInitialized = false;
   bool ptInitialized = false;
 
+  WardModel();
+
   WardModel.fromSnapshot(DocumentSnapshot snapshot) {
     try {
       name = snapshot.get('name');

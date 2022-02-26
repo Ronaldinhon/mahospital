@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 
 import 'dept_model.dart';
@@ -38,7 +39,7 @@ class UserModel {
       updatedAt =
           DateTime.fromMillisecondsSinceEpoch(snapshot.get('updatedAt'));
       id = snapshot.id;
-      deptList();
+      // deptList();
       // initialized = true;
     } catch (e) {
       Get.snackbar(
@@ -57,9 +58,16 @@ class UserModel {
       List<DeptModel> emptyToFull = [];
       QuerySnapshot<Object?> deptObjs =
           await deptRef.where('members', arrayContainsAny: [id]).get();
-      deptObjs.docs.forEach((v) => emptyToFull.add(DeptModel.fromSnapshot(v)));
+      // deptObjs.docs.forEach((v) => emptyToFull.add(DeptModel.fromSnapshot(v)));
+      for (var v in deptObjs.docs) {
+        emptyToFull.add(DeptModel.fromSnapshot(v));
+        // emptyToFull.add(await DeptModel.create(v)); 
+        // above didnt work either
+        // resulted to having hospShortName in dept model
+      }
       userDepts = emptyToFull;
       deptInitialised = true;
+      deptListController.addDepts(emptyToFull);
       return emptyToFull;
     }
   }

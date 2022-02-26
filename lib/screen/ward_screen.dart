@@ -39,6 +39,8 @@ class _WardScreenState extends State<WardScreen> {
   @override
   void initState() {
     wardModel = widget.ward;
+    currentWPLC.cwm.value = wardModel;
+    currentWPLC.setPdfTheme();
     super.initState();
   }
 

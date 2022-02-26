@@ -18,9 +18,13 @@ class UserListController extends GetxController {
 
   void addUser(UserModel value) => this._userModelList.add(value);
 
-  List<UserModel> createAndReturnForDept(List userIds) {
+  String userSName(String userId) =>
+      _userModelList.firstWhere((um) => um.id == userId).shortName;
+
+  Future<List<UserModel>> createAndReturnForDept(List userIds) async {
     List<UserModel> emptyToFull = [];
-    userIds.forEach((ui) async {
+    // userIds.forEach((ui) async {
+    for (var ui in userIds) {
       if (userIdInCont(ui))
         emptyToFull.add(userModel(ui));
       else {
@@ -29,8 +33,18 @@ class UserListController extends GetxController {
         addUser(hospModel);
         emptyToFull.add(hospModel);
       }
-    });
+    }
+    // );
     return emptyToFull;
+  }
+
+  Future<void> createAndSave(String hospId) async {
+    if (!userIdInCont(hospId)) {
+      DocumentSnapshot<Object?> hosp = await userRef.doc(hospId).get();
+      UserModel userModel = UserModel.fromSnapshot(hosp);
+      addUser(userModel);
+    }
+    // return userModel;
   }
 
   void clear() => _userModelList = [];

@@ -7,6 +7,7 @@ import 'controllers/auth_controller.dart';
 // import 'controllers/list_all_ward_pt.dart';
 import 'controllers/list_all_ward_pts_controller.dart';
 import 'controllers/list_current_ward_pts_controller.dart';
+import 'controllers/list_dept_controller.dart';
 import 'controllers/list_hosp_controller.dart';
 import 'controllers/list_user_controller.dart';
 import 'controllers/sum_rer_controller.dart';
@@ -16,7 +17,7 @@ import 'routing/routes.dart';
 import 'screen/as_hosp_screen.dart';
 import 'screen/login_screen.dart';
 import 'screen/profile_screen.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+// import 'package:cloud_functions/cloud_functions.dart';
 
 import '/constants/style.dart';
 // import '/controllers/menu_controller.dart';
@@ -42,6 +43,7 @@ void main() async {
     Get.put(AllWardPtListController());
     Get.put(CurrentWardPtsListController());
     Get.put(EntryChartController());
+    Get.put(DeptListController());
     // Get.put(SumRerController());
     // FirebaseFunctions.instanceFor(region: 'us-central1').useFunctionsEmulator('localhost', 4000);
   });

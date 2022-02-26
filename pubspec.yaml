@@ -70,8 +70,9 @@ dependencies:
   # ndialog: ^4.1.0 #80 nizwar.id
   google_fonts: ^2.1.0
   charts_flutter: ^0.11.0
-  get: ^4.1.4
+  get: ^4.6.0
   data_table_2: ^2.0.3
+  substring_highlight: ^1.0.33
 
 
   # The following adds the Cupertino Icons font to your application.

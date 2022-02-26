@@ -5,6 +5,7 @@ import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 import 'package:mahospital/models/user.dart';
 import 'package:mahospital/models/ward_model.dart';
+import 'package:mahospital/models/ward_pt_model.dart';
 
 import 'hosp_model.dart';
 
@@ -24,6 +25,14 @@ class DeptModel {
   late bool verified;
   bool membersInitialised = false;
   bool wardsInitialised = false;
+  List<String> wardIdList = [];
+  List<WardPtModel> lpwpm = []; // list of peri wardPtModel
+
+  // static Future<DeptModel> create(snapshot) async {
+  //   return DeptModel.fromSnapshot(snapshot);
+  // }
+  DeptModel(this.id, this.name);
+  // did not work
 
   DeptModel.fromSnapshot(DocumentSnapshot snapshot, {bool guaw: true}) {
     //get user and ward
@@ -35,13 +44,13 @@ class DeptModel {
       ownerId = snapshot.get('ownerId');
       verified = snapshot.get('verified');
       members = snapshot.get('members');
+      hospShortName = snapshot.get('hospShortName');
       id = snapshot.id;
-      getHospName(hospId);
-      if (guaw) {
-        getUserModels();
-        getWards();
-      }
-      // getUserModel
+      // getHospName(hospId);
+      // if (guaw) {
+      //   getUserModels();
+      //   getWards();
+      // }
       // initialized = true;
     } catch (e) {
       Get.snackbar(
@@ -60,24 +69,42 @@ class DeptModel {
   }
 
   Future<List<UserModel>> getUserModels() async {
+    //called only when in dept screen
     if (membersInitialised)
       return memberModels;
     else {
-      memberModels = userListController.createAndReturnForDept(members);
+      memberModels = await userListController.createAndReturnForDept(members);
       membersInitialised = true;
       return memberModels;
     }
   }
 
   Future<List<WardModel>> getWards() async {
+    //called only when in dept screen
     if (wardsInitialised)
       return wardModels;
     else {
       List<WardModel> emptyToFull = [];
       QuerySnapshot<Object?> wardObjs =
           await wardRef.where('deptId', isEqualTo: id).get();
-      wardObjs.docs
-          .forEach((wo) => emptyToFull.add(WardModel.fromSnapshot(wo)));
+
+      for (var wo in wardObjs.docs) {
+        emptyToFull.add(WardModel.fromSnapshot(wo));
+        wardIdList.add(wo.id);
+      }
+      
+      // You cannot use 'array_contains' filters with 'not_in' filters.
+      // await wardPtRef
+      //     .where('wardId', whereNotIn: wardIdList)
+      //     .where('deptIds', arrayContains: id)
+      //     .get()
+      //     .then((qss) {
+      //   print(qss);
+      //   for (var d in qss.docs) {
+      //     var wpm = WardPtModel.fromSnapshot(d);
+      //     lpwpm.add(wpm);
+      //   }
+      // });
       wardModels = emptyToFull;
       return wardModels;
     }

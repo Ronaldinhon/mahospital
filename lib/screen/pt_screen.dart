@@ -6,22 +6,20 @@ import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/controllers/list_current_ward_pts_controller.dart';
 import 'package:mahospital/helpers/reponsiveness.dart';
+import 'package:mahospital/tabs/disc_ent.dart';
 import 'package:mahospital/tabs/flow_chart.dart';
 import 'package:mahospital/tabs/imaging_tab.dart';
+import 'package:mahospital/tabs/int_ent.dart';
+import 'package:mahospital/tabs/int_note.dart';
+import 'package:mahospital/tabs/op_doc.dart';
 import 'package:mahospital/tabs/pt_details.dart';
 import 'package:mahospital/tabs/records.dart';
 import 'package:mahospital/tabs/rer_pdf.dart';
+import 'package:mahospital/tabs/rev_ent.dart';
 import 'package:mahospital/tabs/summary.dart';
-// import 'package:memodx/foundation/pdf_path.dart';
-// import 'package:memodx/tabs/download_tab.dart';
 // import 'package:memodx/tabs/drug_charts.dart';
-// import 'package:memodx/tabs/flow_chart.dart';
-// import 'package:memodx/tabs/imaging_tab.dart';
-// import 'package:memodx/tabs/preview_pdf.dart';
-// import 'package:memodx/tabs/pt_details.dart';
-// import 'package:memodx/tabs/rer_pdf_download.dart';
-// import 'package:memodx/tabs/rer_tab.dart';
 // import 'package:memodx/tabs/summary_pdf.dart';
+// maybe not pdf if summary its needed
 // import 'package:memodx/tabs/temp_chart.dart';
 // import 'package:memodx/tabs/vitals_chart.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +29,7 @@ class PtScreen extends StatefulWidget {
   _PtScreenState createState() => _PtScreenState();
 }
 
-class _PtScreenState extends State<PtScreen> {
+class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
   late File pdf;
   // TabController _tabController;
 
@@ -62,7 +60,9 @@ class _PtScreenState extends State<PtScreen> {
   @override
   void initState() {
     super.initState();
-    // _tabController = new TabController(vsync: this, length: 14);
+    ecController.tc1 = new TabController(length: 10, vsync: this);
+    ecController.tc2 = new TabController(length: 10, vsync: this);
+    ecController.tc3 = new TabController(length: 10, vsync: this);
   }
 
   double _ratio = 0.5;
@@ -91,18 +91,40 @@ class _PtScreenState extends State<PtScreen> {
                     title: Row(
                       children: [
                         ElevatedButton(
-                          child: Icon(Icons.arrow_left),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.white),
+                              visualDensity:
+                                  VisualDensity(horizontal: -4, vertical: -4)),
+                          child: Icon(
+                            Icons.arrow_left,
+                            color: Colors.black,
+                          ),
                           onPressed: () => _decrementCounter(),
                         ),
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(currentWPLC.cbm.value.name),
-                            Text(currentWPLC.cwpm.value.name),
+                            Text(
+                              currentWPLC.cbm.value.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              currentWPLC.cwpm.value.name,
+                              overflow: TextOverflow.ellipsis,
+                            )
                           ],
                         ),
                         ElevatedButton(
-                          child: Icon(Icons.arrow_right),
+                          child: Icon(
+                            Icons.arrow_right,
+                            color: Colors.black,
+                          ),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.white),
+                              visualDensity:
+                                  VisualDensity(horizontal: -4, vertical: -4)),
                           onPressed: () => _incrementCounter(),
                         )
                       ],
@@ -118,7 +140,7 @@ class _PtScreenState extends State<PtScreen> {
                           width: _width1,
                           child: Container(
                             child: DefaultTabController(
-                              length: 5,
+                              length: 10,
                               child: Column(
                                 children: [
                                   Container(
@@ -127,6 +149,7 @@ class _PtScreenState extends State<PtScreen> {
                                     height: 50,
                                     width: _width1,
                                     child: TabBar(
+                                        controller: ecController.tc1,
                                         isScrollable: true,
                                         unselectedLabelColor:
                                             Colors.white.withOpacity(0.3),
@@ -134,19 +157,35 @@ class _PtScreenState extends State<PtScreen> {
                                         tabs: [
                                           tabBar('Pt Details'),
                                           tabBar('RER'),
+                                          tabBar('Rev/Ent'),
                                           tabBar('Summary'),
+                                          tabBar('Int Entry'),
+                                          tabBar('Int Note'),
+                                          tabBar('Disc Entry'),
+                                          tabBar('Disc Doc'),
                                           tabBar('FlowChart'),
                                           tabBar('Imaging'),
                                         ]),
                                   ),
                                   Expanded(
-                                    child: TabBarView(children: <Widget>[
-                                      PtDetails(),
-                                      Records(),
-                                      RerPdf(),
-                                      FlowChart(),
-                                      ImagingTab(),
-                                    ]),
+                                    child: TabBarView(
+                                        controller: ecController.tc1,
+                                        children: <Widget>[
+                                          PtDetails(),
+                                          Records(
+                                              ecController.tc1,
+                                              ecController.itemScrollController,
+                                              ecController
+                                                  .itemPositionsListener),
+                                          RevEnt(),
+                                          RerPdf(),
+                                          IntEnt(),
+                                          IntNote(),
+                                          DiscEnt(),
+                                          OpDoc(),
+                                          FlowChart(),
+                                          ImagingTab(),
+                                        ]),
                                   ),
                                 ],
                               ),
@@ -176,7 +215,7 @@ class _PtScreenState extends State<PtScreen> {
                           width: _width2,
                           child: Container(
                             child: DefaultTabController(
-                              length: 5,
+                              length: 10,
                               child: Column(
                                 children: [
                                   Container(
@@ -185,6 +224,7 @@ class _PtScreenState extends State<PtScreen> {
                                     height: 50,
                                     width: _width2,
                                     child: TabBar(
+                                        controller: ecController.tc2,
                                         isScrollable: true,
                                         unselectedLabelColor:
                                             Colors.white.withOpacity(0.3),
@@ -192,19 +232,36 @@ class _PtScreenState extends State<PtScreen> {
                                         tabs: [
                                           tabBar('Pt Details'),
                                           tabBar('RER'),
+                                          tabBar('Rev/Ent'),
                                           tabBar('Summary'),
+                                          tabBar('Int Entry'),
+                                          tabBar('Int Note'),
+                                          tabBar('Disc Entry'),
+                                          tabBar('Disc Doc'),
                                           tabBar('FlowChart'),
                                           tabBar('Imaging'),
                                         ]),
                                   ),
                                   Expanded(
-                                    child: TabBarView(children: <Widget>[
-                                      PtDetails(),
-                                      Records(),
-                                      RerPdf(),
-                                      FlowChart(),
-                                      ImagingTab(),
-                                    ]),
+                                    child: TabBarView(
+                                        controller: ecController.tc2,
+                                        children: <Widget>[
+                                          PtDetails(),
+                                          Records(
+                                              ecController.tc2,
+                                              ecController
+                                                  .itemScrollController1,
+                                              ecController
+                                                  .itemPositionsListener1),
+                                          RevEnt(),
+                                          RerPdf(),
+                                          IntEnt(),
+                                          IntNote(),
+                                          DiscEnt(),
+                                          OpDoc(),
+                                          FlowChart(),
+                                          ImagingTab(),
+                                        ]),
                                   ),
                                 ],
                               ),
@@ -217,24 +274,46 @@ class _PtScreenState extends State<PtScreen> {
                 ));
           })
         : Obx(() => DefaultTabController(
-              length: 5,
+              length: 10,
               child: Scaffold(
                 appBar: AppBar(
                   title: Row(
                     children: [
                       ElevatedButton(
-                        child: Icon(Icons.arrow_left),
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.white),
+                            visualDensity:
+                                VisualDensity(horizontal: -4, vertical: -4)),
+                        child: Icon(
+                          Icons.arrow_left,
+                          color: Colors.black,
+                        ),
                         onPressed: () => _decrementCounter(),
                       ),
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(currentWPLC.cbm.value.name),
-                          Text(currentWPLC.cwpm.value.name),
+                          Text(
+                            currentWPLC.cbm.value.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            currentWPLC.cwpm.value.name,
+                            overflow: TextOverflow.ellipsis,
+                          )
                         ],
                       ),
                       ElevatedButton(
-                        child: Icon(Icons.arrow_right),
+                        child: Icon(
+                          Icons.arrow_right,
+                          color: Colors.black,
+                        ),
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.white),
+                            visualDensity:
+                                VisualDensity(horizontal: -4, vertical: -4)),
                         onPressed: () => _incrementCounter(),
                       )
                     ],
@@ -242,110 +321,38 @@ class _PtScreenState extends State<PtScreen> {
                     mainAxisSize: MainAxisSize.max,
                   ),
                   bottom: TabBar(
+                      controller: ecController.tc3,
                       isScrollable: true,
                       unselectedLabelColor: Colors.white.withOpacity(0.3),
                       indicatorColor: Colors.white,
                       tabs: [
                         tabBar('Pt Details'),
                         tabBar('RER'),
-                        tabBar('Preview'),
+                        tabBar('Rev/Ent'),
+                        tabBar('Summary'),
+                        tabBar('Int Entry'),
+                        tabBar('Int Note'),
+                        tabBar('Disc Entry'),
+                        tabBar('Disc Doc'),
                         tabBar('FlowChart'),
                         tabBar('Imaging'),
-                        // tabBar('RER'),
-                        // tabBar('Vitals'),
-                        // tabBar('Temp'),
-                        // tabBar('F/C'),
-                        // tabBar('ECG'),
-                        // tabBar('CC'),
-                        // tabBar('Images'),
-                        // tabBar('Drugs'),
-                        // tabBar('I/O'),
-                        // tabBar('Generate'),
-                        // tabBar('Preview'),
-                        // tabBar('Download'),
                       ]),
                 ),
-                body: TabBarView(children: <Widget>[
+                body:
+                    TabBarView(controller: ecController.tc3, children: <Widget>[
                   PtDetails(),
-                  Records(),
+                  Records(ecController.tc3, ecController.itemScrollController,
+                      ecController.itemPositionsListener),
+                  RevEnt(),
                   RerPdf(),
+                  IntEnt(),
+                  IntNote(),
+                  DiscEnt(),
+                  OpDoc(),
                   FlowChart(),
                   ImagingTab(),
-                  // RerPdfDownload(upLevelPdf),
-                  // RerTab(),
-                  // VitalsChart(),
-                  // TempChart(),
-                  // Center(child: Text('ECG...')),
-                  // Center(child: Text('Culture, Cytology, HPE...')),
-                  // DrugCharts(),
-                  // Center(child: Icon(Icons.monetization_on)),
-                  // Center(child: Text('Generate')),
-                  // DownloadTab(filePath: pdf == null ? null : pdf.path),
                 ]),
               ),
             ));
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Obx(() => DefaultTabController(
-  //         length: 2,
-  //         child: Scaffold(
-  //           appBar: AppBar(
-  //             title: Row(
-  //               children: [
-  //                 ElevatedButton(
-  //                   child: Icon(Icons.arrow_left),
-  //                   onPressed: () => _decrementCounter(),
-  //                 ),
-  //                 Text(currentWPLC.cbm.value.name +
-  //                     ' - ' +
-  //                     currentWPLC.cwpm.value.name),
-  //                 ElevatedButton(
-  //                   child: Icon(Icons.arrow_right),
-  //                   onPressed: () => _incrementCounter(),
-  //                 )
-  //               ],
-  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             ),
-  //             bottom: TabBar(
-  //                 isScrollable: true,
-  //                 unselectedLabelColor: Colors.white.withOpacity(0.3),
-  //                 indicatorColor: Colors.white,
-  //                 tabs: [
-  //                   tabBar('Pt Details'),
-  //                   tabBar('Summary'),
-  //                   // tabBar('RER'),
-  //                   // tabBar('Vitals'),
-  //                   // tabBar('Temp'),
-  //                   // tabBar('F/C'),
-  //                   // tabBar('ECG'),
-  //                   // tabBar('CC'),
-  //                   // tabBar('Images'),
-  //                   // tabBar('Drugs'),
-  //                   // tabBar('I/O'),
-  //                   // tabBar('Generate'),
-  //                   // tabBar('Preview'),
-  //                   // tabBar('Download'),
-  //                 ]),
-  //           ),
-  //           body: TabBarView(children: <Widget>[
-  //             PtDetails(),
-  //             Summary(),
-  //             // RerPdfDownload(upLevelPdf),
-  //             // RerTab(),
-  //             // VitalsChart(),
-  //             // TempChart(),
-  //             // FlowChart(),
-  //             // Center(child: Text('ECG...')),
-  //             // Center(child: Text('Culture, Cytology, HPE...')),
-  //             // ImagingTab(),
-  //             // DrugCharts(),
-  //             // Center(child: Icon(Icons.monetization_on)),
-  //             // Center(child: Text('Generate')),
-  //             // DownloadTab(filePath: pdf == null ? null : pdf.path),
-  //           ]),
-  //         ),
-  //       ));
-  // }
 }

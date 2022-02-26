@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 // import 'came';
 // import 'package:camera_web/camera_web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -21,6 +22,7 @@ import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:mahospital/cameras/extract_text_camera.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 import 'package:mahospital/models/bed_model.dart';
@@ -49,7 +51,6 @@ class _BedScreenState extends State<BedScreen> {
   late WardModel wardModel;
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  // final GlobalKey globalKey = new GlobalKey();
   // String bText = 'Add Patient';
   // late Function addPt;
   List<Widget> scanString = [];
@@ -58,6 +59,7 @@ class _BedScreenState extends State<BedScreen> {
   ScrollController sCont = ScrollController();
   ScreenshotController ssCont = ScreenshotController();
   bool wardPtAdded = false;
+  bool ptIni = false;
 
   late String uid;
   DateTime selectedDate = DateTime.now();
@@ -99,12 +101,13 @@ class _BedScreenState extends State<BedScreen> {
   // final _formKey2 = GlobalKey<FormState>();
   // final TextEditingController _stringController = TextEditingController();
 
-  // final nameCont = TextEditingController();
-  // final nicknameCont = TextEditingController();
-  // final ptIdCont = TextEditingController();
-  // final raceCont = TextEditingController();
+  final nameCont = TextEditingController(text: '');
+  final nicknameCont = TextEditingController(text: '');
+  final ptIdCont = TextEditingController(text: '');
+  final raceCont = TextEditingController(text: '');
+  final addressCont = TextEditingController(text: '');
+
   final dobCont = TextEditingController();
-  // final addressCont = TextEditingController();
   final doAdCont = TextEditingController();
   final GlobalKey qrGlobalKey = new GlobalKey();
 
@@ -119,8 +122,13 @@ class _BedScreenState extends State<BedScreen> {
       cameras = availableCameras;
       camera = cameras.first;
     });
+
     super.initState();
   }
+
+  final HttpsCallable admitWardPt = FirebaseFunctions.instance.httpsCallable(
+    'admitWardPt',
+  );
 
   // _toastInfo(String info) {
   // Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
@@ -310,6 +318,25 @@ class _BedScreenState extends State<BedScreen> {
       });
   }
 
+  Future<void> updateBed(String ptId) async {
+    // await bedRef.doc(bedModel.id).update({'ptId': ptId, 'lastUpdatedBy': uid}); // in cloud function
+    // var wpm = WardPtModel.fromSnapshot(await pt.get());
+    var updatedBedModel =
+        BedModel.fromSnapshot(await bedRef.doc(bedModel.id).get());
+    await updatedBedModel.getPtModel();
+    var index = currentWPLC.currentBML.indexWhere((bm) => bm.id == bedModel.id);
+    currentWPLC.currentBML
+        .replaceRange(index, index + 1, [updatedBedModel]); // i come back first
+    if (updatedBedModel.ptInitialised) {
+      currentWPLC.cbm.value = updatedBedModel;
+      currentWPLC.cwpm.value = updatedBedModel.wardPtModel;
+      // ptIni = true;
+      Get.off(PtScreen());
+    }
+    // above 2 lines are so that can go to current pt
+    // if not initialised how...
+  }
+
   void _submitAuthForm() async {
     try {
       setState(() {
@@ -345,7 +372,7 @@ class _BedScreenState extends State<BedScreen> {
         'lastUpdatedBy': uid,
         'rn': [ptRN],
         'wardId': widget.ward.id,
-        'deptIds': [widget.ward.deptId],
+        'deptIds': [], // leave empty until got review
         'hospId': widget.ward.hospId,
         'admittedAt': [doAdCont.text],
         'dischargedAt': [],
@@ -355,19 +382,7 @@ class _BedScreenState extends State<BedScreen> {
         await bedRef
             .doc(bedModel.id)
             .update({'ptId': pt.id, 'lastUpdatedBy': uid});
-        // var wpm = WardPtModel.fromSnapshot(await pt.get());
-        var updatedBedModel =
-            BedModel.fromSnapshot(await bedRef.doc(bedModel.id).get());
-        updatedBedModel.getPtModel();
-        var index =
-            currentWPLC.currentBML.indexWhere((bm) => bm.id == bedModel.id);
-        currentWPLC.currentBML.replaceRange(
-            index, index + 1, [updatedBedModel]); // i come back first
-        if (updatedBedModel.ptInitialised) {
-          currentWPLC.cbm.value = updatedBedModel;
-          currentWPLC.cwpm.value = updatedBedModel.wardPtModel;
-        }
-
+        await updateBed(pt.id);
         // currentWPLC.addPtModel(wpm);
         // bedRef.doc(widget.bed.id).update({
         //   'occupied': true,
@@ -421,24 +436,82 @@ class _BedScreenState extends State<BedScreen> {
     }
   }
 
-  // void _pickImage() async {
-  //   final pickedImage = await picker.getImage(
-  //     source: ImageSource.gallery,
-  //     // imageQuality: 50,
-  //     // maxWidth: 150,
-  //   );
-  //   imagePath = pickedImage?.path;
-  //   interpret(imagePath);
-  // }
+  void _pickImage(BuildContext ctx) async {
+    final pickedImage = await picker.pickImage(
+      source: ImageSource.gallery,
+      // imageQuality: 50,
+      // maxWidth: 150,
+    );
+    imagePath = pickedImage!.path;
+    interpret(imagePath);
+  }
 
-  // Future<void> interpret(String path) async {
-  //   if (path != null) {
-  //     var inputImage = InputImage.fromFilePath(path);
-  //     regText = await _textDetector.processImage(inputImage);
-  //     List<String> creds = LineSplitter.split(regText.text).toList();
-  //     createCards(creds);
-  //   }
-  // }
+  // late PersistentBottomSheetController _controller;
+  // final GlobalKey globalKey = GlobalKey<ScaffoldState>();
+  double bottomHeight = 0;
+
+  Future<void> interpret(String path) async {
+    // if (path != null) {
+    var inputImage = InputImage.fromFilePath(path);
+    regText = await _textDetector.processImage(inputImage);
+    setState(() {
+      ptCreds = LineSplitter.split(regText.text).toList();
+      bottomHeight = 200;
+    });
+    // globalKey.currentState!.showBottomSheet(
+    //   (BuildContext context) {
+    //     return ;
+    //   },
+    // );
+    // Get.bottomSheet(
+    //   Container(
+    //     decoration: BoxDecoration(color: Colors.white),
+    //     child:
+    //     ConstrainedBox(
+    //       constraints: BoxConstraints(
+    //         maxHeight: 200,
+    //       ),
+    //       child:
+    //       ListView.builder(
+    //         shrinkWrap: true,
+    //         itemCount: ptCreds.length,
+    //         itemBuilder: (BuildContext context, int index) {
+    //           return Container(
+    //             decoration: BoxDecoration(
+    //               borderRadius: BorderRadius.all(
+    //                 Radius.circular(4),
+    //               ),
+    //               border: Border.all(
+    //                 color: Colors.black,
+    //                 width: 1,
+    //               ),
+    //             ),
+    //             padding: const EdgeInsets.only(top: 4.0),
+    //             margin: const EdgeInsets.all(4.0),
+    //             child: ListTile(
+    //               visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+    //               dense: true,
+    //               title: Text(
+    //                 ptCreds[index],
+    //               ),
+    //               onTap: () =>
+    //                   Clipboard.setData(ClipboardData(text: ptCreds[index])),
+    //             ),
+    //           );
+    //         },
+    //         // children: scanString,
+    //       ),
+    //     ),
+    //   ),
+    //   isDismissible: false,
+    //   persistent: true,
+    //   backgroundColor: null
+    // );
+
+    // List<String> creds = LineSplitter.split(regText.text).toList();
+    // createCards(creds);
+    // }
+  }
 
   // void createCards(List<String> creds) {
   //   ptCreds = creds;
@@ -522,10 +595,111 @@ class _BedScreenState extends State<BedScreen> {
   String seachString = '';
   final _searchKey = GlobalKey<FormState>();
   final FocusNode fc = FocusNode();
+  // Widget bottom2 = Container(
+  //       decoration: BoxDecoration(color: Colors.white),
+  //       child: ConstrainedBox(
+  //         constraints: BoxConstraints(
+  //           maxHeight: 200,
+  //         ),
+  //         child: ListView.builder(
+  //           shrinkWrap: true,
+  //           itemCount: ptCreds.length,
+  //           itemBuilder: (BuildContext context, int index) {
+  //             return Container(
+  //               decoration: BoxDecoration(
+  //                 borderRadius: BorderRadius.all(
+  //                   Radius.circular(4),
+  //                 ),
+  //                 border: Border.all(
+  //                   color: Colors.black,
+  //                   width: 1,
+  //                 ),
+  //               ),
+  //               padding: const EdgeInsets.only(top: 4.0),
+  //               margin: const EdgeInsets.all(4.0),
+  //               child: ListTile(
+  //                 visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+  //                 dense: true,
+  //                 title: Text(
+  //                   ptCreds[index],
+  //                 ),
+  //                 onTap: () =>
+  //                     Clipboard.setData(ClipboardData(text: ptCreds[index])),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       ),
+  //     );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomSheet: Container(
+        height: bottomHeight,
+        // decoration: BoxDecoration(color: Colors.black),
+        child:
+            // ConstrainedBox(
+            //   constraints: BoxConstraints(
+            //     maxHeight: 200,
+            //   ),
+            //   child:
+
+            //   SingleChildScrollView(
+            // child:
+
+            Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.cancel),
+                  // need to disable button on refresh
+                  onPressed: () {
+                    setState(() {
+                      bottomHeight = 0;
+                    });
+                  },
+                )
+              ],
+            ),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 130),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: ptCreds.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      // color: Colors.lightBlue, - masks inkwell effect of ListTile
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(4),
+                      ),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 1,
+                      ),
+                    ),
+                    padding: const EdgeInsets.only(top: 4.0),
+                    margin: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      onTap: () => Clipboard.setData(
+                          ClipboardData(text: ptCreds[index])),
+                      visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                      dense: true,
+                      title: Text(
+                        ptCreds[index],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: Text('${wardModel.shortName} - ${bedModel.name}'),
       ),
@@ -552,8 +726,7 @@ class _BedScreenState extends State<BedScreen> {
                         Expanded(
                           flex: 1,
                           child: DropdownButtonFormField<String>(
-                            decoration:
-                                InputDecoration(labelText: 'Identification'),
+                            decoration: InputDecoration(labelText: 'Type'),
                             style: TextStyle(color: Colors.black),
                             items: <String>['', 'Name', 'Ic', 'RN']
                                 .map((String value) {
@@ -573,9 +746,17 @@ class _BedScreenState extends State<BedScreen> {
                           width: 20,
                         ),
                         Expanded(
-                          flex: 4,
+                          flex: 3,
                           child: TextFormField(
                             controller: searchCont,
+                            onFieldSubmitted: (val) {
+                              setState(() {
+                                seachString = searchCont.text;
+                              });
+                              _searchWardPt(
+                                  field: searchField, iden: seachString);
+                              fc.unfocus();
+                            },
                             decoration: InputDecoration(
                               labelText: 'Name/Ic/RN',
                               suffixIcon: IconButton(
@@ -609,16 +790,72 @@ class _BedScreenState extends State<BedScreen> {
                         return ExpansionTile(
                           title: Text('Search Patient List'),
                           subtitle: Text(wardPtList!.length.toString()),
-                          children: wardPtList.length > 0
-                              ? wardPtList
+                          children: wardPtList.length == 0
+                              ? []
+                              : wardPtList
                                   .map((wp) => ListTile(
-                                      title: new Text(wp.name),
-                                      onTap: () {
-                                        currentWPLC.addPtModel(wp);
-                                        Get.to(PtScreen());
-                                      }))
-                                  .toList()
-                              : [],
+                                        title: new Text(wp.name),
+                                        // onTap: () {
+                                        //   currentWPLC.addPtModel(wp);
+                                        //   Get.to(PtScreen());
+                                        // }
+                                        trailing: wp.wardId.isNotEmpty
+                                            ? Text('Admitted')
+                                            : Obx(() => ElevatedButton(
+                                                  child: Text('Admit'),
+                                                  onPressed: currentWPLC
+                                                          .aptb.value
+                                                      ? null
+                                                      : () async {
+                                                          currentWPLC.aptb
+                                                              .value = true;
+                                                          await admitWardPt
+                                                              .call(<String,
+                                                                  dynamic>{
+                                                            'wardPtId': wp.id,
+                                                            'bedId':
+                                                                bedModel.id,
+                                                            'admittedDate': DateFormat(
+                                                                    'dd/MM/yyyy')
+                                                                .format(DateTime
+                                                                    .now()),
+                                                            'addedById': uid,
+                                                          }).then((v) async {
+                                                            bool success =
+                                                                v.data as bool;
+                                                            if (success) {
+                                                              await updateBed(
+                                                                  wp.id);
+                                                            } else {
+                                                              Get.snackbar(
+                                                                'Error Admitting Pt',
+                                                                'Unable to admit patient to bed',
+                                                                snackPosition:
+                                                                    SnackPosition
+                                                                        .BOTTOM,
+                                                                backgroundColor:
+                                                                    Colors.red,
+                                                              );
+                                                            }
+                                                            currentWPLC.aptb
+                                                                .value = false;
+                                                          }).catchError((e) {
+                                                            Get.snackbar(
+                                                              'Error Admitting Pt',
+                                                              e.toString(),
+                                                              snackPosition:
+                                                                  SnackPosition
+                                                                      .BOTTOM,
+                                                              backgroundColor:
+                                                                  Colors.red,
+                                                            );
+                                                            currentWPLC.aptb
+                                                                .value = false;
+                                                          });
+                                                        },
+                                                )),
+                                      ))
+                                  .toList(),
                           initiallyExpanded: true,
                         );
                       } else {
@@ -637,6 +874,35 @@ class _BedScreenState extends State<BedScreen> {
                   SizedBox(
                     height: 3,
                   ),
+                  Row(
+                    children: [
+                      Text('Patient Id Picture'),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.camera_alt),
+                        onPressed: () async {
+                          imagePath = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (c) {
+                                return ExtractTextCamera(
+                                    camera); // need to change
+                              },
+                            ),
+                          );
+                          interpret(imagePath);
+                        },
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.photo),
+                        onPressed: () => _pickImage(context),
+                      ),
+                    ],
+                  ),
                   Form(
                     key: _formKey,
                     child: Column(
@@ -644,55 +910,62 @@ class _BedScreenState extends State<BedScreen> {
                       children: <Widget>[
                         TextFormField(
                           key: ValueKey('name'),
-                          // controller: nameCont,
+                          controller: nameCont,
                           keyboardType: TextInputType.name,
                           validator: MinLengthValidator(4,
                               errorText:
                                   'Patient Name must be at least 4 characters long'),
                           decoration: InputDecoration(
-                            labelText: 'Patient Name',
-                            // prefixIcon: IconButton(
-                            //   icon: Icon(Icons.paste),
-                            //   onPressed: () async {
-                            //     ClipboardData? data = await Clipboard.getData(
-                            //         Clipboard.kTextPlain);
-                            //     setState(() {
-                            //       nameCont.text = data!.text!;
-                            //     });
-                            //   },
-                            // )
-                          ),
+                              labelText: 'Patient Name',
+                              prefixIcon: isApp
+                                  ? IconButton(
+                                      icon: Icon(Icons.paste),
+                                      onPressed: () async {
+                                        ClipboardData? data =
+                                            await Clipboard.getData(
+                                                Clipboard.kTextPlain);
+                                        // setState(() {
+                                        nameCont.text += data!.text! + ' ';
+                                        // });
+                                      },
+                                    )
+                                  : null),
                           onSaved: (value) {
                             name = value!.trim();
                           },
+                          autofocus: true,
+                          textInputAction: TextInputAction.next,
                         ),
                         TextFormField(
                           key: ValueKey('ptIc'),
-                          // controller: ptIdCont,
+                          controller: ptIdCont,
                           keyboardType: TextInputType.text,
                           validator: MinLengthValidator(6,
                               errorText:
                                   'Patient IC must be at least 6 characters long'),
                           decoration: InputDecoration(
-                            labelText: 'Patient IC',
-                            // prefixIcon: IconButton(
-                            //   icon: Icon(Icons.paste),
-                            //   onPressed: () async {
-                            //     ClipboardData data = await Clipboard.getData(
-                            //         Clipboard.kTextPlain);
-                            //     setState(() {
-                            //       ptIdCont.text = data.text;
-                            //     });
-                            //   },
-                            // )
-                          ),
+                              labelText: 'Patient IC',
+                              prefixIcon: isApp
+                                  ? IconButton(
+                                      icon: Icon(Icons.paste),
+                                      onPressed: () async {
+                                        ClipboardData? data =
+                                            await Clipboard.getData(
+                                                Clipboard.kTextPlain);
+                                        // setState(() {
+                                        ptIdCont.text += data!.text! + ' ';
+                                        // });
+                                      },
+                                    )
+                                  : null),
                           onSaved: (value) {
                             ptIc = value!.trim();
                           },
+                          textInputAction: TextInputAction.next,
                         ),
                         TextFormField(
                           key: ValueKey('nickname'),
-                          // controller: nicknameCont,
+                          controller: nicknameCont,
                           keyboardType: TextInputType.name,
                           validator: MinLengthValidator(4,
                               errorText:
@@ -703,30 +976,35 @@ class _BedScreenState extends State<BedScreen> {
                           onSaved: (value) {
                             nickName = value!.trim();
                           },
+                          textInputAction: TextInputAction.next,
                         ),
                         TextFormField(
                           key: ValueKey('ptRN'),
-                          // controller: ptIdCont,
+                          controller: ptIdCont,
                           keyboardType: TextInputType.text,
                           validator: MinLengthValidator(6,
                               errorText:
                                   'Patient RN must be at least 6 characters long'),
+                          // apparently now MinLengthValidator can detect even if field is empty now
                           decoration: InputDecoration(
-                            labelText: 'Patient RN',
-                            // prefixIcon: IconButton(
-                            //   icon: Icon(Icons.paste),
-                            //   onPressed: () async {
-                            //     ClipboardData data = await Clipboard.getData(
-                            //         Clipboard.kTextPlain);
-                            //     setState(() {
-                            //       ptIdCont.text = data.text;
-                            //     });
-                            //   },
-                            // )
-                          ),
+                              labelText: 'Patient RN',
+                              prefixIcon: isApp
+                                  ? IconButton(
+                                      icon: Icon(Icons.paste),
+                                      onPressed: () async {
+                                        ClipboardData? data =
+                                            await Clipboard.getData(
+                                                Clipboard.kTextPlain);
+                                        // setState(() {
+                                        ptIdCont.text += data!.text! + ' ';
+                                        // });
+                                      },
+                                    )
+                                  : null),
                           onSaved: (value) {
                             ptRN = value!.trim();
                           },
+                          textInputAction: TextInputAction.next,
                         ),
                         SizedBox(
                           height: 10,
@@ -754,24 +1032,27 @@ class _BedScreenState extends State<BedScreen> {
                         ),
                         TextFormField(
                           key: ValueKey('race'),
-                          // controller: raceCont,
+                          controller: raceCont,
                           keyboardType: TextInputType.name,
                           decoration: InputDecoration(
-                            labelText: 'Patient Race',
-                            // prefixIcon: IconButton(
-                            //   icon: Icon(Icons.paste),
-                            //   onPressed: () async {
-                            //     ClipboardData data = await Clipboard.getData(
-                            //         Clipboard.kTextPlain);
-                            //     setState(() {
-                            //       raceCont.text = data.text;
-                            //     });
-                            //   },
-                            // )
-                          ),
+                              labelText: 'Patient Race',
+                              prefixIcon: isApp
+                                  ? IconButton(
+                                      icon: Icon(Icons.paste),
+                                      onPressed: () async {
+                                        ClipboardData? data =
+                                            await Clipboard.getData(
+                                                Clipboard.kTextPlain);
+                                        setState(() {
+                                          raceCont.text += data!.text! + ' ';
+                                        });
+                                      },
+                                    )
+                                  : null),
                           onSaved: (value) {
                             race = value!.trim();
                           },
+                          textInputAction: TextInputAction.next,
                         ),
                         TextFormField(
                           key: ValueKey('dob'),
@@ -782,7 +1063,7 @@ class _BedScreenState extends State<BedScreen> {
                               errorText: 'Date of Birth is required'),
                           decoration: InputDecoration(
                             labelText: 'Date of Birth',
-                            suffixIcon: IconButton(
+                            prefixIcon: IconButton(
                               icon: Icon(Icons.calendar_today),
                               onPressed: () => _selectDate(context),
                             ),
@@ -803,31 +1084,35 @@ class _BedScreenState extends State<BedScreen> {
                           //       DateFormat('dd/MM/yyyy').parse(value!.trim());
                           //   dob = selectedDate.ti;
                           // },
+                          textInputAction: TextInputAction.next,
                         ),
                         TextFormField(
                           key: ValueKey('address'),
-                          // controller: addressCont,
+                          controller: addressCont,
                           keyboardType: TextInputType.name,
                           validator: MinLengthValidator(8,
                               errorText:
                                   'Patient\'s Address must be at least 8 characters or shorter'),
                           decoration: InputDecoration(
-                            labelText: 'Patient\'s Address',
-                            // prefixIcon: IconButton(
-                            //   icon: Icon(Icons.paste),
-                            //   onPressed: () async {
-                            //     ClipboardData data = await Clipboard.getData(
-                            //         Clipboard.kTextPlain);
-                            //     setState(() {
-                            //       addressCont.text = data.text;
-                            //     });
-                            //   },
-                            // )
-                          ),
+                              labelText: 'Patient\'s Address',
+                              prefixIcon: isApp
+                                  ? IconButton(
+                                      icon: Icon(Icons.paste),
+                                      onPressed: () async {
+                                        ClipboardData? data =
+                                            await Clipboard.getData(
+                                                Clipboard.kTextPlain);
+                                        setState(() {
+                                          addressCont.text += data!.text! + ' ';
+                                        });
+                                      },
+                                    )
+                                  : null),
                           maxLines: 3,
                           onSaved: (value) {
                             address = value!;
                           },
+                          textInputAction: TextInputAction.next,
                         ),
                         TextFormField(
                           key: ValueKey('doAd'),
@@ -837,7 +1122,7 @@ class _BedScreenState extends State<BedScreen> {
                               errorText: 'Date of Admission is required'),
                           decoration: InputDecoration(
                             labelText: 'Date of Admission',
-                            suffixIcon: IconButton(
+                            prefixIcon: IconButton(
                               icon: Icon(Icons.calendar_today),
                               onPressed: () => _selectDateOfAd(context),
                             ),
@@ -858,6 +1143,7 @@ class _BedScreenState extends State<BedScreen> {
                           //       DateFormat('dd/MM/yyyy').parse(value!.trim());
                           //   dob = selectedDate.ti;
                           // },
+                          textInputAction: TextInputAction.done,
                         ),
                         SizedBox(
                           height: 15,
@@ -869,45 +1155,24 @@ class _BedScreenState extends State<BedScreen> {
                                   onPressed: () => _trySubmit(),
                                   child: Text('Add Patient'),
                                 )
+                              // : ptIni // straight away go to PtScreen in updateBed()
+                              //     ? ElevatedButton(
+                              //         onPressed: () => Get.off(PtScreen()),
+                              //         child: Text('Go to $name page'),
+                              //       )
                               : ElevatedButton(
-                                  onPressed: () => Get.to(PtScreen()),
-                                  child: Text('Go to $name page'),
+                                  onPressed: () => Get.back(),
+                                  child: Text('Go back to ward page'),
                                 ),
+                        SizedBox(
+                          height: 160,
+                        ),
                       ],
                     ),
                   ),
                   SizedBox(
                     height: 8,
                   ),
-                  // Row(
-                  //   children: [
-                  //     Text('Patient Id Picture'),
-                  //     SizedBox(
-                  //       width: 15,
-                  //     ),
-                  //     IconButton(
-                  //       icon: Icon(Icons.camera_alt),
-                  //       onPressed: () async {
-                  //         imagePath = await Navigator.of(context).push(
-                  //           MaterialPageRoute(
-                  //             builder: (c) {
-                  //               return ExtractTextCamera(
-                  //                   camera); // need to change
-                  //             },
-                  //           ),
-                  //         );
-                  //         interpret(imagePath);
-                  //       },
-                  //     ),
-                  //     SizedBox(
-                  //       width: 10,
-                  //     ),
-                  //     IconButton(
-                  //       icon: Icon(Icons.photo),
-                  //       onPressed: _pickImage,
-                  //     ),
-                  //   ],
-                  // ),
                   // ConstrainedBox(
                   //   constraints: BoxConstraints(
                   //     maxHeight: 300,
@@ -932,10 +1197,7 @@ class _BedScreenState extends State<BedScreen> {
                   //           margin: const EdgeInsets.all(4.0),
                   //           child: ListTile(
                   //             dense: true,
-                  //             // contentPadding: EdgeInsets.zero,
                   //             title: Text(ptCreds[index]),
-                  //             // tileColor: Colors.blue,
-                  //             // leading:
                   //             subtitle: Row(
                   //               mainAxisSize: MainAxisSize.min,
                   //               children: [
@@ -945,86 +1207,18 @@ class _BedScreenState extends State<BedScreen> {
                   //                   onPressed: () {
                   //                     _stringController.text = ptCreds[index];
                   //                     // _controllerMTFK =
-                  //                     Scaffold.of(context).showBottomSheet<void>(
+
+                  //                     Scaffold.of(context)
+                  //                         .showBottomSheet<void>(
                   //                       (BuildContext context) {
                   //                         return Container(
                   //                           padding: EdgeInsets.all(25.0),
                   //                           color: Colors.amber,
-                  //                           child: Form(
-                  //                             key: _formKey2,
-                  //                             child: Column(
-                  //                               mainAxisAlignment:
-                  //                                   MainAxisAlignment.center,
-                  //                               mainAxisSize: MainAxisSize.min,
-                  //                               children: <Widget>[
-                  //                                 Flexible(
-                  //                                   flex: 1,
-                  //                                   child: TextFormField(
-                  //                                     controller:
-                  //                                         _stringController,
-                  //                                     onSaved: (String value) {
-                  //                                       _stringController.text =
-                  //                                           value;
-                  //                                     },
-                  //                                     decoration:
-                  //                                         const InputDecoration(
-                  //                                       border:
-                  //                                           const UnderlineInputBorder(),
-                  //                                       filled: true,
-                  //                                       hintText:
-                  //                                           'Type two words with space',
-                  //                                       labelText:
-                  //                                           'Seach words *',
-                  //                                     ),
-                  //                                   ),
-                  //                                 ),
-                  //                                 Flexible(
-                  //                                   flex: 1,
-                  //                                   child: ElevatedButton(
-                  //                                       child: const Text(
-                  //                                           'Close BottomSheet'),
-                  //                                       onPressed: () {
-                  //                                         _formKey2.currentState!
-                  //                                             .save();
-                  //                                         setString(
-                  //                                             index,
-                  //                                             _stringController
-                  //                                                 .text);
-                  //                                         Navigator.pop(context);
-                  //                                       }),
-                  //                                 ),
-                  //                               ],
-                  //                             ),
-                  //                           ),
+                  //                           child: Container(),
                   //                         );
                   //                       },
                   //                     );
                   //                   },
-                  //                 ),
-                  //                 IconButton(
-                  //                   iconSize: 18,
-                  //                   icon: Icon(Icons.copy, color: Colors.black),
-                  //                   onPressed: () => Clipboard.setData(
-                  //                       ClipboardData(text: ptCreds[index])),
-                  //                 ),
-                  //                 IconButton(
-                  //                   iconSize: 18,
-                  //                   icon: Icon(Icons.paste, color: Colors.black),
-                  //                   onPressed: () async {
-                  //                     ClipboardData data =
-                  //                         await Clipboard.getData(
-                  //                             Clipboard.kTextPlain);
-                  //                     setState(() {
-                  //                       ptCreds[index] += ' ' + data.text;
-                  //                     });
-                  //                   },
-                  //                 ),
-                  //                 IconButton(
-                  //                   iconSize: 18,
-                  //                   icon: Icon(Icons.delete, color: Colors.black),
-                  //                   onPressed: () => setState(() {
-                  //                     ptCreds.removeAt(index);
-                  //                   }),
                   //                 ),
                   //               ],
                   //             ),
@@ -1035,7 +1229,7 @@ class _BedScreenState extends State<BedScreen> {
                   //     ),
                   //   ),
                   // ),
-                  qrCode
+                  // qrCode
                 ],
               ),
             ),

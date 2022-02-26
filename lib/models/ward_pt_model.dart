@@ -33,6 +33,10 @@ class WardPtModel {
   late String idLastUpdatedBy;
   late String hospId;
 
+  late Map entries;
+  late Map latestEntry;
+  late List<int> orderedDateTime;
+
   // bool individualFieldInitialised = false;
   bool sumIni = false;
   bool rerIni = false;
@@ -60,12 +64,16 @@ class WardPtModel {
       address = snapshot.get('address');
       List<dynamic> rns = snapshot.get('rn');
       rNos = rns.map((rn) => rn.toString()).toList();
+      hospId = snapshot.get('hospId');
 // activeDepts
-// inactiveDepts
+// inactiveDepts - no need
 // if member of hosp then can see ba
-      wardId = snapshot.get('wardId');
+      List<dynamic> aDepts = snapshot.get('deptIds');
+      activeDepts = aDepts.map((rn) => rn.toString()).toList();
+      wardId = snapshot.get('wardId') ?? '';
       base16rmd = snapshot.get('base16rmd');
       random32 = snapshot.get('random32');
+      getEntries();
     } catch (e) {
       Get.snackbar("Error retrieving patient data",
           e.toString() + ' Please refresh ward page.',
@@ -94,8 +102,29 @@ class WardPtModel {
     return '${name.capitalize}, ${age}yo ${race.capitalize} $gender';
   }
 
+  String age() {
+    int agee = DateTime.now()
+            .difference(DateFormat('dd/MM/yyyy').parse(birthDate))
+            .inDays ~/
+        365;
+    return agee.toString();
+  }
+
   void setQrCred(String name, String iC) {
     name = name;
     icNumber = iC;
+  }
+
+  Future<void> getEntries() async {
+    DocumentSnapshot entrySS =
+        await wardPtRef.doc(id).collection('entries').doc('1').get();
+    if (entrySS.exists) {
+      rerIni = true;
+      entries = entrySS.get('entries');
+      orderedDateTime = entries.keys.map((f) => int.parse(f)).toList();
+      orderedDateTime.sort((a, b) => b.compareTo(a));
+      latestEntry = entries[orderedDateTime.first.toString()];
+      // print(latestEntry['data'].toString());
+    }
   }
 }

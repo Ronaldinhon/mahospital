@@ -21,6 +21,9 @@ final CollectionReference wardPtRef = ffi.collection('wardPts');
 final isWebMobile = kIsWeb &&
     (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.android);
+final isApp = !kIsWeb &&
+    (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android);
 CollectionReference drRef = ffi.collection('drId');
 CollectionReference snRef = ffi.collection('snId');
 FirebaseStorage storage = FirebaseStorage.instance;

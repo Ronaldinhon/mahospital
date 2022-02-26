@@ -22,9 +22,11 @@ class HospListController extends GetxController {
   void addHosp(HospModel value) => this._hospModelList.add(value);
 
   Future<HospModel> createAndReturn(String hospId) async {
-    if (hospIdInCont(hospId))
+    // print(hospId);
+    if (hospIdInCont(hospId)) {
+      // print('got ady');
       return hospModel(hospId);
-    else {
+    } else {
       DocumentSnapshot<Object?> hosp = await hospRef.doc(hospId).get();
       HospModel hospModel = HospModel.fromSnapshot(hosp);
       addHosp(hospModel);
@@ -50,18 +52,25 @@ class HospListController extends GetxController {
       // ahi.forEach((hId) => createAndReturn(hId));
 
       // duplicates noted in web only - actually on android app also...
-      // reason for duplicate - we get hosp model from dept 
+      // reason for duplicate - we get hosp model from dept
       // (web not fast enough to initiate hosplistcontroller) in createAndReturn
-      // List<HospModel> hospTsk = []; 
+      // List<HospModel> hospTsk = [];
+      
       QuerySnapshot<Object?> allHosp = await hospRef.get();
-      allHosp.docs.forEach((doc) {
-        createAndReturn(doc.id);
-        // hospTsk.add(HospModel.fromSnapshot(doc));
-      });
+
+      // allHosp.docs.forEach((doc) {
+      //   createAndReturn(doc.id);
+      // });
+
+      // hospTsk.add(HospModel.fromSnapshot(doc));
+
+      for (var doc in allHosp.docs){
+        await createAndReturn(doc.id);
+      }
 
       // listAllHospDone = true;
       // if (kIsWeb) return hospTsk;
-      return hospModels.toSet().toList();
+      return hospModels; //.toSet().toList();
     }
   }
 

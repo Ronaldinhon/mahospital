@@ -41,14 +41,26 @@ class _FlowChartState extends State<FlowChart> {
 
   List<String> bloodParam = [
     'Hb',
-    'Twc',
     'Hct',
     'Plt',
+    'Twc',
     'Na',
     'K',
     'Cl',
     'Urea',
     'Creat',
+    'TProt',
+    'Alb',
+    'Glob',
+    'TBil',
+    'ALT',
+    'AST',
+    'ALP',
+    'Ca',
+    'Phos',
+    'Mg',
+    'CK',
+    'LDH',
   ];
 
   // late double hb;
@@ -119,7 +131,7 @@ class _FlowChartState extends State<FlowChart> {
   Widget _getTitleItemWidget(int dateTimeFromMilli) {
     var timi = DateTime.fromMillisecondsSinceEpoch(dateTimeFromMilli);
     return Container(
-      height: 90,
+      height: 100,
       width: 60,
       decoration: BoxDecoration(
         border: Border.all(
@@ -182,7 +194,8 @@ class _FlowChartState extends State<FlowChart> {
   List<Widget> _getTitleWidget() {
     List<Widget> sth = [];
     sth.add(Container(
-      height: 90,
+      padding: EdgeInsets.all(5),
+      height: 100,
       width: 60,
       decoration: BoxDecoration(
         border: Border.all(
@@ -192,10 +205,16 @@ class _FlowChartState extends State<FlowChart> {
       // padding: EdgeInsets.all(3),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: Icon(Icons.arrow_right),
+          ElevatedButton(
+            child: Icon(
+              Icons.arrow_right,
+              color: Colors.black,
+            ),
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
             // ElevatedButton(
             //   child: Text(
             //     String.fromCharCode(0x2192),
@@ -209,10 +228,14 @@ class _FlowChartState extends State<FlowChart> {
                     builder: (BuildContext context, StateSetter setState) {
                   return Form(
                     key: _formKey,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.65),
-                      child: SingleChildScrollView(
+                    child: Container(
+                      height: 333,
+                      // constraints: BoxConstraints(
+                      //     maxHeight: MediaQuery.of(context).size.height * 0.65),
+
+                      child:
+                          //try first lah
+                          SingleChildScrollView(
                         padding: EdgeInsets.all(5),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -411,16 +434,26 @@ class _FlowChartState extends State<FlowChart> {
               });
             },
           ),
-          IconButton(
-            icon: Icon(Icons.arrow_drop_down),
-            // TextButton(
-            //   style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
-            //   child: Text(
-            //     String.fromCharCode(0x2193),
-            //     style: TextStyle(fontWeight: FontWeight.bold),
-            //   ),
+          ElevatedButton(
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: Colors.black,
+            ),
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
             onPressed: () {},
-          ),
+          )
+          // IconButton(
+          //   icon: Icon(Icons.arrow_drop_down),
+          //   // TextButton(
+          //   //   style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
+          //   //   child: Text(
+          //   //     String.fromCharCode(0x2193),
+          //   //     style: TextStyle(fontWeight: FontWeight.bold),
+          //   //   ),
+          //   onPressed: () {},
+          // ),
         ],
       ),
     ));
@@ -490,7 +523,7 @@ class _FlowChartState extends State<FlowChart> {
       orderedDateTime.sort((a, b) => int.parse(b)
           .compareTo(int.parse(a))); // reversed - actually no need int.parse
       for (var odt in orderedDateTime) {
-        print(odt);
+        // print(odt);
         Map bloodValues = bloodMap[odt];
         // var keys = bloodValues.keys.toList();
         bloodParam.forEach((bp) {

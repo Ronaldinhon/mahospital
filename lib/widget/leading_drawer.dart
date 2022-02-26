@@ -59,7 +59,11 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
     return SafeArea(
       child: Container(
         width: MediaQuery.of(context).size.width /
-            (ResponsiveWidget.isSmallScreen(context) ? 1.5 : 5),
+            (ResponsiveWidget.isSmallScreen(context)
+                ? 1.5
+                : ResponsiveWidget.isMediumScreen(context)
+                    ? 3
+                    : 5),
         child: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,

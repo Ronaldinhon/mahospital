@@ -1,5 +1,6 @@
 // import 'dart:io';
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -78,6 +79,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final focus = FocusNode();
 
+  // final HttpsCallable checkAddMember = FirebaseFunctions.instance.httpsCallable(
+  //   'checkAddMember',
+  // );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,6 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     TextFormField(
+                      autofocus: true,
                       controller: authController.email,
                       textCapitalization: TextCapitalization.none,
                       key: ValueKey('email'),
@@ -135,6 +141,31 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () => _tryLogin(),
                         child: Text('Login'),
                       ),
+                    // ElevatedButton(
+                    //   child: Text('Test function'), // test unauthenticated function call only
+                    //   onPressed: () async {
+                    //     await checkAddMember.call(<String, dynamic>{
+                    //       'adderId': 'PifZco40b8M4qaFf5nthkWvTHH23',
+                    //       'newMemberId': '88lz67dGyRYlvYLTigqJP6N7m3p2',
+                    //       'deptId': 'yugM79fSb48P8D06rQqE',
+                    //       'hospId': '1BPiyIe6E6JAJrBOorpy',
+                    //     }).then((v) {
+                    //       // Get.defaultDialog(title: v.data.toString());
+                    //       // setState(() => addMemberLoading = false);
+                    //       print(v.data);
+                    //       print(v.data['code']);
+                    //     }).catchError((e) {
+                    //       print(e);
+                    //       Get.snackbar(
+                    //         'Error Adding Member',
+                    //         e.toString(),
+                    //         snackPosition: SnackPosition.BOTTOM,
+                    //         backgroundColor: Colors.red,
+                    //       );
+                    //       // setState(() => addMemberLoading = false);
+                    //     });
+                    //   },
+                    // ),
                     if (!_isLoading)
                       TextButton(
                         style: TextButton.styleFrom(

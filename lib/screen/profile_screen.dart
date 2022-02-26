@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,6 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late LocalUser localUser;
   CollectionReference userRef = FirebaseFirestore.instance.collection('users');
   late UserModel u;
+  late Future<DocumentSnapshot> getUser;
 
   // .withConverter<LocalUser>(
   //   fromFirestore: (snapshot, _) => LocalUser.fromJson(snapshot.data()!),
@@ -43,24 +45,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   //   super.initState();
   // }
 
+  // final HttpsCallable checkAddMember = FirebaseFunctions.instance.httpsCallable(
+  //   'checkAddMember',
+  // );
+
   Future<DocumentSnapshot> getUserData() async {
     // if (FirebaseAuth.instance.currentUser == null) {
     // Navigator.of(context).pushReplacementNamed('/login');
     // } else {
     user = auth.currentUser!;
     uid = user.uid;
-    Future<DocumentSnapshot> getUser = userRef.doc(uid).get();
-    await getUser.then((v) {
-      authController.initializeUserModel(v);
-      // localUser = LocalUser(
-      //     email: v.get('email'),
-      //     imageUrl: v.get('imageUrl'),
-      //     name: v.get('name'),
-      //     reg: v.get('reg'),
-      //     title: v.get('title'),
-      //     verified: v.get('verified'),
-      //     verifiedBy: v.get('verifiedBy'));
-    });
+    if (!authController.inited) {
+      getUser = userRef.doc(uid).get();
+      authController.getUserFuture = getUser;
+      authController.inited = true;
+      await getUser.then((v) {
+        authController.initializeUserModel(v);
+        // localUser = LocalUser(
+        //     email: v.get('email'),
+        //     imageUrl: v.get('imageUrl'),
+        //     name: v.get('name'),
+        //     reg: v.get('reg'),
+        //     title: v.get('title'),
+        //     verified: v.get('verified'),
+        //     verifiedBy: v.get('verifiedBy'));
+      });
+    } else {
+      getUser = authController.getUserFuture;
+    }
     // }
     return getUser;
   }
@@ -165,10 +177,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             SizedBox(
                               height: 7,
                             ),
-                            if (u.verified &&
-                                (isWebMobile ||
-                                    [TargetPlatform.iOS, TargetPlatform.android]
-                                        .contains(platform)))
+                            // ElevatedButton(
+                            //   child: Text('Test function'),
+                            //   onPressed: () async {
+                            //     await checkAddMember.call(<String, dynamic>{
+                            //       'adderId': 'PifZco40b8M4qaFf5nthkWvTHH23',
+                            //       'newMemberId': '88lz67dGyRYlvYLTigqJP6N7m3p2',
+                            //       'deptId': 'yugM79fSb48P8D06rQqE',
+                            //       'hospId': '1BPiyIe6E6JAJrBOorpy',
+                            //     }).then((v) {
+                            //       // Get.defaultDialog(title: v.data.toString());
+                            //       // setState(() => addMemberLoading = false);
+                            //       print(v.data);
+                            //     }).catchError((e) {
+                            //       print(e);
+                            //       Get.snackbar(
+                            //         'Error Adding Member',
+                            //         e.toString(),
+                            //         snackPosition: SnackPosition.BOTTOM,
+                            //         backgroundColor: Colors.red,
+                            //       );
+                            //       // setState(() => addMemberLoading = false);
+                            //     });
+                            //   },
+                            // ),
+                            // SizedBox(
+                            //   height: 7,
+                            // ),
+                            if (u.verified && (isWebMobile || isApp))
                               ElevatedButton.icon(
                                 icon: Icon(Icons.qr_code_scanner),
                                 label: Text('Verify a Colleague'),
@@ -209,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   DocumentSnapshot<Object?> coll = await userRef
                                       .doc(memberId.toString())
                                       .get();
-                                    print(memberId);
+                                  print(memberId);
                                   if (coll.exists && !coll.get('verified')) {
                                     userRef.doc(memberId).update({
                                       'verified': true,

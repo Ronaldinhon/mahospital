@@ -34,6 +34,10 @@ class AuthController extends GetxController {
   late firebase_storage.Reference storageRef;
   bool remindCompleteRegistration = false;
 
+  late Future<DocumentSnapshot> getUserFuture;
+  bool inited = false;
+  // apparently getx controller has a initialized bool
+
   User? get user => _firebaseUser.value;
 
   @override
@@ -153,7 +157,9 @@ class AuthController extends GetxController {
   }
 
   void initializeUserModel(DocumentSnapshot ss) async {
-    userController.setUser(UserModel.fromSnapshot(ss));
+    UserModel ownerOfAccount = UserModel.fromSnapshot(ss);
+    userController.setUser(ownerOfAccount);
+    ownerOfAccount.deptList(); // bring out so other user no need dept list
   }
 
   _clearControllers() {

@@ -31,7 +31,7 @@ class _DeptScreenState extends State<DeptScreen> {
   late DeptModel departmentModel;
   late List<UserModel> dmmm; //deptModelMemberModel
   late List<WardModel> dmwm; //deptModelWardModel
-  bool addMemberLoading = false;
+  bool addMemberLoading = false; // this later put into Get controller ba
   late bool isMember;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -43,6 +43,7 @@ class _DeptScreenState extends State<DeptScreen> {
   void initState() {
     uid = auth.currentUser!.uid;
     departmentModel = widget.deptModel;
+    deptListController.getDeptsOfHosp(departmentModel.hospId);
     // iniThis();
     isMember = departmentModel.members.contains(uid);
     super.initState();
@@ -208,7 +209,11 @@ class _DeptScreenState extends State<DeptScreen> {
                           ElevatedButton(
                             child: Text('Refresh'),
                             // need to disable button on refresh
-                            onPressed: () => setState(() {}),
+                            onPressed: () {
+                              departmentModel.wardsInitialised = false;
+                              departmentModel.membersInitialised = false;
+                              setState(() {});
+                            },
                           )
                         ],
                       ),
@@ -238,10 +243,7 @@ class _DeptScreenState extends State<DeptScreen> {
                         SizedBox(
                           height: 10,
                         ),
-                      if (isMember &&
-                          (isWebMobile ||
-                              [TargetPlatform.iOS, TargetPlatform.android]
-                                  .contains(platform)))
+                      if (isMember && (isWebMobile || isApp))
                         if (addMemberLoading)
                           CircularProgressIndicator()
                         else
@@ -260,17 +262,17 @@ class _DeptScreenState extends State<DeptScreen> {
                             //     ),
                             //   ),
                             onPressed: () async {
-                              String? memberId = await Navigator.of(context).push<String>(
-                                    MaterialPageRoute(
-                                      builder: (c) {
-                                        return QrView(
-                                            'Scan colleague\s QR code');
-                                      },
-                                    ),
-                                  );
+                              String? memberId =
+                                  await Navigator.of(context).push<String>(
+                                MaterialPageRoute(
+                                  builder: (c) {
+                                    return QrView('Scan colleague\s QR code');
+                                  },
+                                ),
+                              );
                               // await Get.to(QrCameraScreen(
                               //     'Scan colleage\'s profile QR code'));
-                              
+
                               // final String? memberId =
                               //     await Navigator.of(context).push<String>(
                               //   MaterialPageRoute(
@@ -303,18 +305,44 @@ class _DeptScreenState extends State<DeptScreen> {
                               AsyncSnapshot<dynamic> snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.done) {
-                              return ExpansionTile(
-                                title: Text('Wards'),
-                                subtitle: Text(dmwm.length.toString()),
-                                children: dmwm.length > 0
-                                    ? dmwm
-                                        .map((wm) => ListTile(
-                                            title: new Text(wm.name),
-                                            onTap: () =>
-                                                Get.to(WardScreen(wm))))
-                                        .toList()
-                                    : [],
-                                initiallyExpanded: true,
+                              return Column(
+                                children: [
+                                  ExpansionTile(
+                                    title: Text('Wards'),
+                                    subtitle: Text(dmwm.length.toString()),
+                                    children: dmwm.length > 0
+                                        ? dmwm
+                                            .map((wm) => ListTile(
+                                                title: new Text(wm.name),
+                                                onTap: () =>
+                                                    Get.to(WardScreen(wm))))
+                                            .toList()
+                                        : [],
+                                    initiallyExpanded: true,
+                                  ),
+                                  // SizedBox(
+                                  //   height: 10,
+                                  // ),
+                                  // ExpansionTile(
+                                  //   title: Text('Peri Pts'),
+                                  //   subtitle: Text(departmentModel.lpwpm.length
+                                  //       .toString()),
+                                  //   children: departmentModel.lpwpm.length > 0
+                                  //       ? departmentModel.lpwpm
+                                  //           .map((wpm) => ListTile(
+                                  //                 title: new Text(wpm.name),
+                                  //                 // onTap: () =>
+                                  //                 //     Get.to(WardScreen(wm))
+                                  //                 trailing: Text(
+                                  //                     wpm.wardId.isNotEmpty
+                                  //                         ? 'Cur-Ad'
+                                  //                         : ''),
+                                  //               ))
+                                  //           .toList()
+                                  //       : [],
+                                  //   initiallyExpanded: true,
+                                  // ),
+                                ],
                               );
                             } else {
                               return CircularProgressIndicator();

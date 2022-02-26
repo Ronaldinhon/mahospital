@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mahospital/constants/controllers.dart';
 import 'package:native_pdf_view/native_pdf_view.dart' as nat;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -30,155 +31,68 @@ class _RerPdfState extends State<RerPdf> {
     initDownloader();
     super.initState();
     pdf.addPage(
-        pw.Page(
+        pw.MultiPage(
             pageFormat: pf.PdfPageFormat.a4,
             build: (pw.Context context) {
-              return pw.Center(
-                child: pw.Column(children: <pw.Widget>[
-                  pw.Text('DISCHARGE NOTE'),
-                  pw.SizedBox(height: 10),
-                  pw.Text('HOSPITAL SULTANAH AMINAH, JOHOR BAHRU'),
-                  pw.SizedBox(height: 20),
-                  pw.Row(children: [
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 160,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('1. NAME'),
-                              pw.Text('Chao Tao Xin'),
-                            ])),
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 100,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('2. R/N'),
-                              pw.Text('2015295'),
-                            ])),
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 100,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('3. MRN'),
-                              // pw.Text('2015295'),
-                            ])),
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 120,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('4. I/C NO.'),
-                              pw.Text('960414-04-1414'),
-                            ])),
-                  ])
-                ]),
-              ); // Center
-            }),
-        index: 0);
-    pdf.addPage(
-        pw.Page(
-            pageFormat: pf.PdfPageFormat.a4,
-            build: (pw.Context context) {
-              return pw.Center(
-                child: pw.Column(children: <pw.Widget>[
-                  pw.Text('DISCHARGE NOTE'),
-                  pw.SizedBox(height: 10),
-                  pw.Text('HOSPITAL SULTANAH AMINAH, JOHOR BAHRU'),
-                  pw.SizedBox(height: 20),
-                  pw.Row(children: [
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 160,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('1. NAME'),
-                              pw.Text('Chao Tao Xin'),
-                            ])),
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 100,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('2. R/N'),
-                              pw.Text('2015295'),
-                            ])),
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 100,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('3. MRN'),
-                              // pw.Text('2015295'),
-                            ])),
-                    pw.Container(
-                        decoration: pw.BoxDecoration(
-                            border: pw.Border.all(
-                          color: PdfColors.black,
-                          width: 1,
-                        )),
-                        width: 120,
-                        height: 100,
-                        padding: pw.EdgeInsets.all(8.0),
-                        child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text('4. I/C NO.'),
-                              pw.Text('960414-04-1414'),
-                            ])),
-                  ])
-                ]),
-              ); // Center
+              return
+                  // pw.Center(
+                  //   child:
+                  // pw.Column(children:
+                  <pw.Widget>[
+                pw.Header(
+                  level: 0,
+                  // title: 'Portable Document Format',
+                  child:
+                      // pw.Row(
+                      //     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      //     children: <pw.Widget>[
+                      pw.Text('${currentWPLC.cwm.value.shortName} Patient List',
+                          textScaleFactor: 2),
+                  //   pw.PdfLogo()
+                  // ])
+                ),
+                pw.Table(
+                    border: pw.TableBorder.all(),
+                    children: currentWPLC.currentBML.map((bm) {
+                      return pw.TableRow(children: [
+                        pw.Container(
+                            width: 50,
+                            // decoration: pw.BoxDecoration(
+                            //   border: pw.Border.all(
+                            //     width: 1,
+                            //   ),
+                            // ),
+                            padding: pw.EdgeInsets.all(8.0),
+                            child: pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: [
+                                  pw.Text(bm.name),
+                                  pw.SizedBox(height: 4),
+                                  pw.Text(!bm.ptInitialised
+                                      ? 'No Patient'
+                                      : bm.wardPtModel.ptDetails())
+                                ])),
+                        pw.Container(
+                            width: 150,
+                            // decoration: pw.BoxDecoration(
+                            //   border: pw.Border.all(
+                            //     width: 1,
+                            //   ),
+                            // ),
+                            padding: pw.EdgeInsets.all(8.0),
+                            child: pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: [
+                                  pw.Text(!bm.ptInitialised
+                                      ? '-'
+                                      : !bm.wardPtModel.rerIni
+                                          ? 'No entry yet'
+                                          : bm.wardPtModel.latestEntry['data']
+                                              .toString())
+                                ]))
+                      ]);
+                    }).toList())
+              ];
             }),
         index: 0);
   }

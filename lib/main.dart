@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mahospital/controllers/entry_chart_controller.dart';
 import 'package:mahospital/screen/404/error.dart';
+import 'constants/controllers.dart';
 import 'constants/firebase.dart';
 import 'controllers/auth_controller.dart';
 // import 'controllers/list_all_ward_pt.dart';
@@ -50,8 +53,30 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatelessWidget with WidgetsBindingObserver {
   // This widget is the root of your application.
+
+  Timer timer = Timer(Duration(days: 1), () {});
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == (AppLifecycleState.detached)) {
+      authController.signOut();
+      timer.cancel();
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      print('in/paused');
+      timer = Timer(Duration(minutes: 1), () => authController.signOut());
+    } else if (state == AppLifecycleState.resumed) {
+      timer.cancel();
+      print('resumed');
+    }
+  }
+
+  // @override
+  // void dispose(){
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +92,9 @@ class MyApp extends StatelessWidget {
             page: () => ProfileScreen(),
             middlewares: [AuthMiddleware()]),
         GetPage(
-            name: loginPageRoute,
-            page: () => LoginScreen(),
-            ),
+          name: loginPageRoute,
+          page: () => LoginScreen(),
+        ),
         GetPage(name: asHospPageRoute, page: () => AsHospScreen()),
       ],
       debugShowCheckedModeBanner: false,

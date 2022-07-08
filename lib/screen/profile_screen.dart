@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hand_signature/signature.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 import 'package:mahospital/models/local_user.dart';
@@ -10,6 +13,7 @@ import 'package:mahospital/models/user.dart';
 import 'package:mahospital/widget/leading_drawer.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:ui' as ui;
 
 import 'package:mahospital/cameras/qr_view.dart';
 
@@ -33,21 +37,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late UserModel u;
   late Future<DocumentSnapshot> getUser;
 
+  late HandSignaturePainterView ww;
+  final GlobalKey globalKey = new GlobalKey();
+  final TextEditingController chop = TextEditingController();
+
   // .withConverter<LocalUser>(
   //   fromFirestore: (snapshot, _) => LocalUser.fromJson(snapshot.data()!),
   //   toFirestore: (localUser, _) => localUser.toJson(),
   // );
   // above few lines is shit
 
-  // @override
-  // void initState() {
-  //   // getUserData();
-  //   super.initState();
-  // }
+  @override
+  void initState() {
+    ww = HandSignaturePainterView(
+      control: control,
+      color: Colors.blueGrey,
+      width: 1.0,
+      maxWidth: 10.0,
+      type: SignatureDrawType.shape,
+    );
+    super.initState();
+  }
 
   // final HttpsCallable checkAddMember = FirebaseFunctions.instance.httpsCallable(
   //   'checkAddMember',
   // );
+
+  Future<void> _captureAndSharePng() async {
+    RenderRepaintBoundary boundary =
+        globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    var image = await boundary.toImage(pixelRatio: 1.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    ecController.cc = byteData;
+    // print(byteData!.buffer.asUint8List());
+    // if (byteData != null) {
+    //   final result = await ImageGallerySaver.saveImage(
+    //     byteData.buffer.asUint8List(),
+    //   );
+    // }
+  }
+
+  final HandSignatureControl control = HandSignatureControl(
+    threshold: 3.0,
+    smoothRatio: 0.65,
+    velocityRange: 2.0,
+  );
 
   Future<DocumentSnapshot> getUserData() async {
     // if (FirebaseAuth.instance.currentUser == null) {
@@ -158,6 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             Text("${u.title} ${u.name}"),
                             Text("(${u.shortName})"),
+                            // Image.network(
+                            //     'https://w7.pngwing.com/pngs/285/139/png-transparent-elephant-animal-africa-transparent-background-white-background.png'),
                             SizedBox(
                               height: 10,
                             ),
@@ -268,6 +304,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               version: QrVersions.auto,
                               size: 200.0,
                             ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                                constraints: BoxConstraints(
+                                    minHeight: 200, minWidth: 200),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                  color: Colors.black,
+                                  width: 1,
+                                )),
+                                // color: Colors.white,
+                                child: ww),
+                            SizedBox(
+                              height: 4,
+                            ),
+                            ElevatedButton(
+                                child: Icon(Icons.save),
+                                onPressed: () async => ecController.bb =
+                                    await control.toImage(
+                                        background: Colors.white)),
+                            ElevatedButton(
+                                child: Icon(Icons.delete),
+                                onPressed: () => control.clear()),
+                            SizedBox(
+                              height: 8,
+                            ),
+                            SizedBox(
+                              width: 200,
+                              child: TextFormField(
+                                style: TextStyle(fontSize: 10),
+                                controller: chop,
+                                keyboardType: TextInputType.multiline,
+                                maxLines: null,
+                                decoration: InputDecoration(
+                                  labelText: 'Chop',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(Icons.save),
+                                    onPressed: () => setState(() {}),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            RepaintBoundary(
+                              key: globalKey,
+                              child: Container(
+                                constraints: BoxConstraints(maxWidth: 250),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black, width: 2),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  chop.text,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ),
+                            ElevatedButton(
+                                child: Icon(Icons.save),
+                                onPressed: () => _captureAndSharePng()),
                           ],
                         ),
                       ),

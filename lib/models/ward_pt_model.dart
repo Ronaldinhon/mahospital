@@ -17,6 +17,10 @@ class WardPtModel {
   late String nickName;
   late String address;
   late List<String> rNos;
+  late List<String> admittedAt;
+  late List<String> dischargedAt;
+  late String curDiag;
+  late String curPlan;
 
   late List<String> activeDepts;
   late List<String> inactiveDepts;
@@ -36,6 +40,10 @@ class WardPtModel {
   late Map entries;
   late Map latestEntry;
   late List<int> orderedDateTime;
+  List<String> entryDataList = [];
+  List<String> entryDeptList = [];
+  List<String> uniqueDept = [];
+  List<bool> isSel = [];
 
   // bool individualFieldInitialised = false;
   bool sumIni = false;
@@ -63,8 +71,15 @@ class WardPtModel {
       nickName = snapshot.get('nickName');
       address = snapshot.get('address');
       List<dynamic> rns = snapshot.get('rn');
-      rNos = rns.map((rn) => rn.toString()).toList();
+      rNos = rns.map((rn) => rn.toString().trim()).toList();
+      List<dynamic> aAt = snapshot.get('admittedAt');
+      admittedAt = aAt.map((rn) => rn.toString().trim()).toList();
+      List<dynamic> dAt = snapshot.get('dischargedAt');
+      dischargedAt = dAt.map((rn) => rn.toString().trim()).toList();
       hospId = snapshot.get('hospId');
+      curDiag = snapshot.get('curDiag');
+      curPlan = snapshot.get('curPlan');
+
 // activeDepts
 // inactiveDepts - no need
 // if member of hosp then can see ba
@@ -81,6 +96,18 @@ class WardPtModel {
           backgroundColor: Colors.red,
           duration: Duration(seconds: 5));
     }
+  }
+
+  String rnNos() {
+    return rNos.join(', ');
+  }
+
+  String aAts() {
+    return admittedAt.join(', ');
+  }
+
+  String dAts() {
+    return dischargedAt.join(', ');
   }
 
   String ptDetails() {
@@ -103,17 +130,25 @@ class WardPtModel {
   }
 
   String age() {
-    int agee = DateTime.now()
-            .difference(DateFormat('dd/MM/yyyy').parse(birthDate))
-            .inDays ~/
-        365;
-    return agee.toString();
+    String ageWithUnit = '';
+    int ageInDays = DateTime.now()
+        .difference(DateFormat('dd/MM/yyyy').parse(birthDate))
+        .inDays;
+    int agee = ageInDays ~/ 365;
+    if (agee >= 1) {
+      ageWithUnit = agee.toString() + 'yo';
+    } else {
+      agee = ageInDays ~/ 30;
+      ageWithUnit = agee.toString() + ' months';
+    }
+    if (agee == 0) ageWithUnit = ageInDays.toString() + ' days';
+    return ageWithUnit;
   }
 
-  void setQrCred(String name, String iC) {
-    name = name;
-    icNumber = iC;
-  }
+  // void setQrCred(String name, String iC) {
+  //   name = name;
+  //   icNumber = iC;
+  // }
 
   Future<void> getEntries() async {
     DocumentSnapshot entrySS =
@@ -123,8 +158,28 @@ class WardPtModel {
       entries = entrySS.get('entries');
       orderedDateTime = entries.keys.map((f) => int.parse(f)).toList();
       orderedDateTime.sort((a, b) => b.compareTo(a));
+      orderedDateTime.forEach((itt) {
+        entryDataList.add(entries[itt.toString()]['data'].toString());
+        entryDeptList.add(entries[itt.toString()]['dept'].toString());
+        uniqueDept.add(entries[itt.toString()]['dept'].toString());
+      });
+      print(name + orderedDateTime.length.toString());
+      uniqueDept = uniqueDept.toSet().toList();
+      // print(uniqueDept);
+      uniqueDept.forEach((i) => isSel.add(false));
       latestEntry = entries[orderedDateTime.first.toString()];
       // print(latestEntry['data'].toString());
     }
+  }
+
+  void addFakeEntry() {
+    var wusc = DateTime.now().millisecondsSinceEpoch;
+    var dup = entries[orderedDateTime.last.toString()];
+    entryDataList.add(dup['data'].toString());
+    entryDeptList.add(dup['dept'].toString());
+    uniqueDept.add(dup['dept'].toString());
+    uniqueDept = uniqueDept.toSet().toList();
+    orderedDateTime.add(wusc);
+    entries[wusc.toString()] = dup;
   }
 }

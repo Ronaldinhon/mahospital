@@ -80,10 +80,10 @@ class _WardScreenState extends State<WardScreen> {
       var prevWardPtId;
       bedModelList.asMap().forEach((index, bedModel) {
         if (bedModel.active) {
-          // if (bedModel.ptId.isNotEmpty) {
-          //   wpModels.add(bedModel.wardPtModel);
-          //   prevWardPtId = bedModel.ptId;
-          // }
+          if (bedModel.ptId.isNotEmpty) {
+            wpModels.add(bedModel.wardPtModel);
+            prevWardPtId = bedModel.ptId;
+          }
           // print(bedModel.ptId.isNotEmpty ? bedModel.wardPtModel : 'empty');
           BedListTile bedTile = BedListTile(
             bedModel,
@@ -94,7 +94,7 @@ class _WardScreenState extends State<WardScreen> {
           wBeds.add(bedTile);
         }
       });
-      // currentWPLC.setCurrentPtsList(wpModels);
+      currentWPLC.setCurrentPtsList(wpModels);
       // Provider.of<PtList>(context, listen: false).setList(ptIds);
     }
     return wBeds;

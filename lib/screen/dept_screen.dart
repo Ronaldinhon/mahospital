@@ -360,22 +360,26 @@ class _DeptScreenState extends State<DeptScreen> {
                             AsyncSnapshot<dynamic> snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.done) {
-                            return ExpansionTile(
-                              title: Text('Members'),
-                              subtitle: Text(dmmm.length.toString()),
-                              children: dmmm.length > 0
-                                  ? dmmm
-                                      .map((mm) => ListTile(
-                                            title: new Text(mm.name),
-                                            leading: CircleAvatar(
-                                              backgroundImage:
-                                                  NetworkImage(mm.imageUrl),
-                                            ),
-                                          ))
-                                      .toList()
-                                  : [],
-                              initiallyExpanded: false,
-                            );
+                            return Theme(
+                                data: Theme.of(context).copyWith(
+                                    dividerTheme: DividerThemeData(
+                                        color: Colors.purple, thickness: 3.5)),
+                                child: ExpansionTile(
+                                  title: Text('Members'),
+                                  subtitle: Text(dmmm.length.toString()),
+                                  children: dmmm.length > 0
+                                      ? dmmm
+                                          .map((mm) => ListTile(
+                                                title: new Text(mm.name),
+                                                leading: CircleAvatar(
+                                                  backgroundImage:
+                                                      NetworkImage(mm.imageUrl),
+                                                ),
+                                              ))
+                                          .toList()
+                                      : [],
+                                  initiallyExpanded: false,
+                                ));
                           } else {
                             return CircularProgressIndicator();
                           }

@@ -7,14 +7,15 @@ import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/controllers/list_current_ward_pts_controller.dart';
 import 'package:mahospital/helpers/reponsiveness.dart';
 import 'package:mahospital/tabs/disc_ent.dart';
+import 'package:mahospital/tabs/fc_pdf.dart';
 import 'package:mahospital/tabs/flow_chart.dart';
 import 'package:mahospital/tabs/imaging_tab.dart';
 import 'package:mahospital/tabs/int_ent.dart';
 import 'package:mahospital/tabs/int_note.dart';
-import 'package:mahospital/tabs/op_doc.dart';
+import 'package:mahospital/tabs/disc_doc.dart';
 import 'package:mahospital/tabs/pt_details.dart';
 import 'package:mahospital/tabs/records.dart';
-import 'package:mahospital/tabs/rer_pdf.dart';
+import 'package:mahospital/tabs/ward_pdf.dart';
 import 'package:mahospital/tabs/rev_ent.dart';
 import 'package:mahospital/tabs/summary.dart';
 // import 'package:memodx/tabs/drug_charts.dart';
@@ -23,6 +24,11 @@ import 'package:mahospital/tabs/summary.dart';
 // import 'package:memodx/tabs/temp_chart.dart';
 // import 'package:memodx/tabs/vitals_chart.dart';
 import 'package:provider/provider.dart';
+
+import '../tabs/fc_entry.dart';
+import '../tabs/pt_sum.dart';
+import '../tabs/vs_table.dart';
+import 'edit_fc_param.dart';
 
 class PtScreen extends StatefulWidget {
   @override
@@ -110,7 +116,7 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              currentWPLC.cwpm.value.name,
+                              currentWPLC.cwpm.value.name.capitalize!,
                               overflow: TextOverflow.ellipsis,
                             )
                           ],
@@ -156,10 +162,11 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                                         indicatorColor: Colors.white,
                                         tabs: [
                                           tabBar('Pt Details'),
+                                          tabBar('Pt Sum'),
                                           tabBar('RER'),
                                           tabBar('Rev/Ent'),
-                                          tabBar('Summary'),
-                                          tabBar('Int Entry'),
+                                          tabBar('Ward Sum'),
+                                          // tabBar('Int Entry'),
                                           tabBar('Int Note'),
                                           tabBar('Disc Entry'),
                                           tabBar('Disc Doc'),
@@ -172,17 +179,21 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                                         controller: ecController.tc1,
                                         children: <Widget>[
                                           PtDetails(),
+                                          PtSum(),
                                           Records(
                                               ecController.tc1,
                                               ecController.itemScrollController,
                                               ecController
-                                                  .itemPositionsListener),
+                                                  .itemPositionsListener,
+                                              ecController.fc,
+                                              ecController.searchCont,
+                                              ecController.isSelected),
                                           RevEnt(),
-                                          RerPdf(),
-                                          IntEnt(),
+                                          WardPdf(),
+                                          // IntEnt(),
                                           IntNote(),
                                           DiscEnt(),
-                                          OpDoc(),
+                                          DiscDoc(),
                                           FlowChart(),
                                           ImagingTab(),
                                         ]),
@@ -231,10 +242,11 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                                         indicatorColor: Colors.white,
                                         tabs: [
                                           tabBar('Pt Details'),
+                                          tabBar('Pt Sum'),
                                           tabBar('RER'),
                                           tabBar('Rev/Ent'),
-                                          tabBar('Summary'),
-                                          tabBar('Int Entry'),
+                                          tabBar('Ward Sum'),
+                                          // tabBar('Int Entry'),
                                           tabBar('Int Note'),
                                           tabBar('Disc Entry'),
                                           tabBar('Disc Doc'),
@@ -247,18 +259,22 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                                         controller: ecController.tc2,
                                         children: <Widget>[
                                           PtDetails(),
+                                          PtSum(),
                                           Records(
                                               ecController.tc2,
                                               ecController
                                                   .itemScrollController1,
                                               ecController
-                                                  .itemPositionsListener1),
+                                                  .itemPositionsListener1,
+                                              ecController.fc1,
+                                              ecController.searchCont1,
+                                              ecController.isSelected1),
                                           RevEnt(),
-                                          RerPdf(),
-                                          IntEnt(),
+                                          WardPdf(),
+                                          // IntEnt(),
                                           IntNote(),
                                           DiscEnt(),
-                                          OpDoc(),
+                                          DiscDoc(),
                                           FlowChart(),
                                           ImagingTab(),
                                         ]),
@@ -299,7 +315,7 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            currentWPLC.cwpm.value.name,
+                            currentWPLC.cwpm.value.name.capitalize!,
                             overflow: TextOverflow.ellipsis,
                           )
                         ],
@@ -327,29 +343,44 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
                       indicatorColor: Colors.white,
                       tabs: [
                         tabBar('Pt Details'),
+                        tabBar('Pt Sum'),
                         tabBar('RER'),
                         tabBar('Rev/Ent'),
-                        tabBar('Summary'),
-                        tabBar('Int Entry'),
-                        tabBar('Int Note'),
                         tabBar('Disc Entry'),
-                        tabBar('Disc Doc'),
                         tabBar('FlowChart'),
+                        tabBar('VsChart'),
+                        // tabBar('Int Entry'),
+                        tabBar('Int Note'),
+                        tabBar('Disc Doc'),
                         tabBar('Imaging'),
                       ]),
                 ),
                 body:
                     TabBarView(controller: ecController.tc3, children: <Widget>[
                   PtDetails(),
-                  Records(ecController.tc3, ecController.itemScrollController,
-                      ecController.itemPositionsListener),
+                  !ecController.printingSum.value ? PtSum() : WardPdf(),
+                  !ecController.printingRec.value
+                      ? Records(
+                          ecController.tc3,
+                          ecController.itemScrollController,
+                          ecController.itemPositionsListener,
+                          ecController.fc,
+                          ecController.searchCont,
+                          ecController.isSelected)
+                      : IntNote(),
                   RevEnt(),
-                  RerPdf(),
-                  IntEnt(),
+                  !ecController.printingDisc.value ? DiscEnt() : DiscDoc(),
+                  ecController.printingFC.value
+                      ? FcPdf()
+                      : ecController.entryFC.value
+                          ? FcEntry()
+                          : ecController.editFCparam.value
+                              ? EditFcParam()
+                              : FlowChart(),
+                  VsTable(),
+                  WardPdf(),
+                  // IntEnt(),
                   IntNote(),
-                  DiscEnt(),
-                  OpDoc(),
-                  FlowChart(),
                   ImagingTab(),
                 ]),
               ),

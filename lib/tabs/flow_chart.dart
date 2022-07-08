@@ -20,24 +20,7 @@ class FlowChart extends StatefulWidget {
 
 class _FlowChartState extends State<FlowChart> {
   // String imagePath;
-  late CameraDescription camera;
   // List<CameraDescription> cameras;
-  DateTime selectedDate = DateTime.now();
-
-  // List<String> dates = [
-  // '01/05',
-  // '02/05',
-  // '03/05',
-  // '04/05',
-  // '05/05',
-  // '06/05',
-  // '07/05',
-  // '08/05',
-  // '09/05',
-  // '10/05',
-  // '11/05',
-  // '00/00',
-  // ];
 
   List<String> bloodParam = [
     'Hb',
@@ -49,153 +32,78 @@ class _FlowChartState extends State<FlowChart> {
     'Cl',
     'Urea',
     'Creat',
-    'TProt',
-    'Alb',
-    'Glob',
-    'TBil',
-    'ALT',
-    'AST',
-    'ALP',
-    'Ca',
-    'Phos',
-    'Mg',
-    'CK',
-    'LDH',
-  ];
+    // 'TProt',
+    // 'Alb',
+    // 'Glob',
+    // 'TBil',
+    // 'ALT',
+    // 'AST',
+    // 'ALP',
+    // 'Ca',
+    // 'Phos',
+    // 'Mg',
+    // 'CK',
+    // 'LDH',
+  ]; // uncomment all will result in record without attribute to cause error !!!
 
-  // late double hb;
-  // late double twc;
-  // late double hct;
-  // late double plt;
-  // late double na;
-  // late double k;
-  // late double cl;
-  // late double urea;
-  // late double creat;
-  late List<List<String>>
-      wer; // it seems that im saving it as string, then it can be saved as an empty string
-  late int numberOfDays;
-  Map<String, List<String>> masterMap = {};
-  Map<String, dynamic> initialMap = {};
-  // i think just make it into a Map
+  // late List<List<String>>
+  //     wer; // it seems that im saving it as string, then it can be saved as an empty string
+  // late int numberOfDays;
+  // late List ascNum;
+  // late List orderedDateTime;
 
-  final _formKey = GlobalKey<FormState>();
+  // late Future<List> bloodIx;
+
+// numberOfDays
+// ascNum
+// orderedDateTime
+// wer
+
+  // Map<String, List<String>> masterMap = {};
 
   @override
   void initState() {
-    availableCameras().then((availableCameras) {
-      // cameras = availableCameras;
-      camera = availableCameras.first;
-    });
+    // bloodIx = getFlowChartData(currentWPLC.cwpm.value.id);
     // wer = [hb, twc, hct, plt, na, k, cl, urea, creat];
 
     super.initState();
   }
 
-  _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate, // Refer step 1
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2025),
-    );
-    if (picked != null)
-      setState(() {
-        selectedDate = picked;
-        dobCont.text = DateFormat('dd/MM/yyyy').format(picked);
-      });
-  }
-
-  TimeOfDay selectedTime = TimeOfDay.now();
-
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? pickedS = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-      builder: (BuildContext context, Widget? child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedS != null && pickedS != selectedTime)
-      setState(() {
-        selectedTime = pickedS;
-        timeCont.text =
-            pickedS.hour.toString() + ':' + pickedS.minute.toString();
-      });
-  }
-
   Widget _getTitleItemWidget(int dateTimeFromMilli) {
     var timi = DateTime.fromMillisecondsSinceEpoch(dateTimeFromMilli);
-    return Container(
-      height: 100,
-      width: 60,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1,
-        ),
-      ),
-      child: Center(
-        child: RotatedBox(
-          quarterTurns: 3,
-          child: Column(
-            children: [
-              Text(DateFormat('dd/MM/yyyy').format(timi)),
-              Text(DateFormat('kk:mm').format(timi)),
-            ],
-            crossAxisAlignment: CrossAxisAlignment.center,
-          ),
-        ),
-      ),
-    );
-    // Column(
-    //   mainAxisSize: MainAxisSize.min,
-    //   children: <Widget>[
-    // IconButton(
-    //   icon: Icon(Icons.calendar_today),
-    //   onPressed: () => _selectDate(context),
-    // ),
-
-    // date == ''
-    //     ? IconButton(
-    //         // need to change to dialog
-    //         icon: Icon(Icons.add_box),
-    //         onPressed: () async {
-    //           imagePath = await Navigator.of(context).push(
-    //             MaterialPageRoute(
-    //               builder: (c) {
-    //                 return ExtractTextCamera(camera); // need to change
-    //               },
-    //             ),
-    //           );
-    //           interpret(imagePath);
-    //         },
-    //       )
-    //     : Container(),
-    // Container(
-    //   child: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-    //   width: width,
-    //   height: 56,
-    //   padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-    //   alignment: Alignment.centerLeft,
-    // ),
-    // ],
+    return Material(
+        child: InkWell(
+            splashColor: Colors.red,
+            onTap: () => print('yeah'),
+            child: Container(
+              height: 110,
+              width: 60,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  width: 1,
+                ),
+              ),
+              child: Center(
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: Column(
+                    children: [
+                      Text(DateFormat('dd/MM/yyyy').format(timi)),
+                      Text(DateFormat('kk:mm').format(timi)),
+                      Icon(Icons.edit, size: 18),
+                    ],
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                  ),
+                ),
+              ),
+            )));
   }
-
-  final dobCont = TextEditingController();
-  final timeCont = TextEditingController();
-  bool loading = false;
-  late DocumentReference fc;
-  Map<String, dynamic> res = {};
 
   List<Widget> _getTitleWidget() {
     List<Widget> sth = [];
     sth.add(Container(
       padding: EdgeInsets.all(5),
-      height: 100,
+      height: 110,
       width: 60,
       decoration: BoxDecoration(
         border: Border.all(
@@ -208,231 +116,43 @@ class _FlowChartState extends State<FlowChart> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ElevatedButton(
+              child: Icon(
+                Icons.arrow_right,
+                color: Colors.black,
+              ),
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue),
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
+              // ElevatedButton(
+              //   child: Text(
+              //     String.fromCharCode(0x2192),
+              //     style: TextStyle(fontWeight: FontWeight.bold),
+              //   ),
+              onPressed: () => ecController.entryFC.value = true
+              // async {
+              //   await Get.defaultDialog(
+              //     title: 'Add Results',
+              //     contentPadding: EdgeInsets.all(15.0),
+              //     content: StatefulBuilder(
+              //         builder: (BuildContext context, StateSetter setState) {
+              //       return
+              //     }),
+              //   );
+              //   setState(() {
+              //     loading = false;
+              //   });
+              // },
+              ),
+          ElevatedButton(
             child: Icon(
-              Icons.arrow_right,
+              Icons.print,
               color: Colors.black,
             ),
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                 visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
-            // ElevatedButton(
-            //   child: Text(
-            //     String.fromCharCode(0x2192),
-            //     style: TextStyle(fontWeight: FontWeight.bold),
-            //   ),
-            onPressed: () async {
-              await Get.defaultDialog(
-                title: 'Add Results',
-                contentPadding: EdgeInsets.all(15.0),
-                content: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return Form(
-                    key: _formKey,
-                    child: Container(
-                      height: 333,
-                      // constraints: BoxConstraints(
-                      //     maxHeight: MediaQuery.of(context).size.height * 0.65),
-
-                      child:
-                          //try first lah
-                          SingleChildScrollView(
-                        padding: EdgeInsets.all(5),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextFormField(
-                              key: ValueKey('date'),
-                              controller: dobCont,
-                              // controller: _dobController,
-                              keyboardType: TextInputType.datetime,
-                              validator: RequiredValidator(
-                                  errorText: 'Date is required'),
-                              decoration: InputDecoration(
-                                labelText: 'Date',
-                                suffixIcon: IconButton(
-                                  icon: Icon(Icons.calendar_today),
-                                  onPressed: () => _selectDate(context),
-                                ),
-                              ),
-                            ),
-                            TextFormField(
-                              key: ValueKey('time'),
-                              controller: timeCont,
-                              keyboardType: TextInputType.datetime,
-                              validator: RequiredValidator(
-                                  errorText: 'Time is required'),
-                              decoration: InputDecoration(
-                                labelText: 'Time',
-                                suffixIcon: IconButton(
-                                  icon: Icon(Icons.access_time),
-                                  onPressed: () => _selectTime(context),
-                                ),
-                              ),
-                            ),
-                            !kIsWeb
-                                ? IconButton(
-                                    icon: Icon(Icons.camera_alt),
-                                    onPressed: () {
-                                      // Map<String, dynamic> results =
-                                      print('its pressed');
-                                      Get.to(FlowChartCamera(camera),
-                                          preventDuplicates: false);
-                                      // print(results);
-                                      // print(
-                                      //     'print something mtfk this is my dream');
-                                      // setState(() => res.addAll(results));
-                                    },
-                                  )
-                                : Container(),
-                            Obx(() => Container(
-                                child:
-                                    Text(ecController.ixResults.toString()))),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Hb',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Hb'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Twc',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Twc'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Hct',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Hct'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Plt',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Plt'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Na',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Na'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'K',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['K'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Cl',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Cl'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Urea',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Urea'] = val);
-                              },
-                            ),
-                            TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Creat',
-                              ),
-                              onSaved: (val) {
-                                if (val != null)
-                                  setState(() => initialMap['Creat'] = val);
-                              },
-                            ),
-                            SizedBox(
-                              height: 8,
-                            ),
-                            !loading
-                                ? ElevatedButton(
-                                    child: Text('Save'),
-                                    onPressed: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        setState(() => loading = true);
-                                        _formKey.currentState!.save();
-                                        DocumentSnapshot fcss = await fc.get();
-                                        String dateInUTC = DateTime(
-                                                selectedDate.year,
-                                                selectedDate.month,
-                                                selectedDate.day,
-                                                selectedTime.hour,
-                                                selectedTime.minute)
-                                            .millisecondsSinceEpoch
-                                            .toString();
-                                        if (ecController.ixResults.isNotEmpty) {
-                                          initialMap
-                                              .addAll(ecController.ixResults);
-                                          ecController.ixResults =
-                                              RxMap<String, dynamic>();
-                                        }
-                                        if (fcss.exists) {
-                                          Map<String, dynamic> bloods =
-                                              fcss.get('bloods');
-                                          bloods[dateInUTC.toString()] =
-                                              initialMap;
-
-                                          fc.update({'bloods': bloods}).then(
-                                              (v) {
-                                            Get.back();
-                                          });
-                                        } else {
-                                          fc.set({
-                                            'bloods': {dateInUTC: initialMap}
-                                          }).then((v) {
-                                            Get.back();
-                                          });
-                                        }
-                                      }
-                                    })
-                                : CircularProgressIndicator()
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              );
-              setState(() {
-                loading = false;
-              });
-            },
+            onPressed: () => ecController.printingFC.value = true,
           ),
           ElevatedButton(
             child: Icon(
@@ -442,7 +162,7 @@ class _FlowChartState extends State<FlowChart> {
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                 visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
-            onPressed: () {},
+            onPressed: () => ecController.editFCparam.value = true,
           )
           // IconButton(
           //   icon: Icon(Icons.arrow_drop_down),
@@ -457,9 +177,9 @@ class _FlowChartState extends State<FlowChart> {
         ],
       ),
     ));
-    print(numberOfDays);
-    if (numberOfDays != 0)
-      orderedDateTime.forEach((dt) {
+    // print(numberOfDays);
+    if (ecController.numberOfDays != 0)
+      ecController.orderedDateTime.forEach((dt) {
         sth.add(_getTitleItemWidget(int.parse(dt)));
       });
     return sth;
@@ -475,28 +195,43 @@ class _FlowChartState extends State<FlowChart> {
   }
 
   Widget _generateFirstColumn(BuildContext context, int index) {
-    return Container(
-      child: Text(bloodParam[index]),
-      width: 60,
-      height: 30,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1,
+    return Material(
+      child: InkWell(
+        splashColor: Colors.red,
+        onTap: () => addFCvalue(bloodParam[index], index),
+        child: Container(
+          child: Text(bloodParam[index]),
+          width: 60,
+          height: 40,
+          decoration: BoxDecoration(
+            border: Border.all(
+              width: 1,
+            ),
+          ),
+          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+          alignment: Alignment.center,
         ),
       ),
-      padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-      alignment: Alignment.center,
     );
   }
 
+  void addFCvalue(String head, int index) {
+    List<String> ixVals = [];
+    for (var ii in ecController.ascNum) {
+      if (ecController.wer[index][ii].isNotEmpty)
+        ixVals.add(ecController.wer[index][ii]);
+    }
+    String oyster = '\n$head ' + ixVals.join(" <--");
+    ecController.mainEditor.text += oyster;
+  }
+
   Widget _generateRightHandSideRow(BuildContext context, int index) {
-    List ascNum = List.generate(numberOfDays, (i) => i);
     List<Widget> rowChildren = [];
-    for (var ii in ascNum) {
+    for (var ii in ecController.ascNum) {
       rowChildren.add(Container(
-        child: Text(wer[index][ii]),
+        child: Text(ecController.wer[index][ii]),
         width: 60,
-        height: 30,
+        height: 40,
         decoration: BoxDecoration(
           border: Border.all(
             width: 1,
@@ -511,39 +246,41 @@ class _FlowChartState extends State<FlowChart> {
     );
   }
 
+  late DocumentReference fc;
   Future<List> getFlowChartData(String id) async {
-    bloodParam.forEach((bp) => masterMap[bp] = []);
-    bloodParam.forEach((bp) => initialMap[bp] = '');
+    bloodParam.forEach((bp) => ecController.masterMap[bp] = []);
     fc = wardPtRef.doc(id).collection('flowCharts').doc('1');
     DocumentSnapshot fcSS = await fc.get();
     if (fcSS.exists) {
       Map bloodMap = fcSS.get('bloods');
-      orderedDateTime = bloodMap.keys.toList();
-      numberOfDays = orderedDateTime.length;
-      orderedDateTime.sort((a, b) => int.parse(b)
+      ecController.orderedDateTime = bloodMap.keys.toList();
+      ecController.numberOfDays = ecController.orderedDateTime.length;
+      ecController.ascNum = List.generate(ecController.numberOfDays, (i) => i);
+      ecController.orderedDateTime.sort((a, b) => int.parse(b)
           .compareTo(int.parse(a))); // reversed - actually no need int.parse
-      for (var odt in orderedDateTime) {
+      for (var odt in ecController.orderedDateTime) {
         // print(odt);
         Map bloodValues = bloodMap[odt];
         // var keys = bloodValues.keys.toList();
         bloodParam.forEach((bp) {
           // if (keys.contains(bp))
-          masterMap[bp]!.add(bloodValues[bp]);
+          ecController.masterMap[bp]!.add(bloodValues[bp]);
           // else
           //   masterMap[bp]!.add('');
         });
       }
       List<List<String>> masterList = [];
       for (var bpp in bloodParam) {
-        masterList.add(masterMap[bpp]!);
+        masterList.add(ecController.masterMap[bpp]!);
       }
-      wer = masterList;
+      // print(masterList);
+      ecController.wer = masterList;
       return masterList;
     } else {
       List<List<String>> emptyList = [];
       bloodParam.forEach((bp) => emptyList.add(['']));
-      wer = emptyList;
-      numberOfDays = 0;
+      ecController.wer = emptyList;
+      ecController.numberOfDays = 0;
       // sth.add(Container(
       //   width: 60,
       //   height: 80,
@@ -554,12 +291,12 @@ class _FlowChartState extends State<FlowChart> {
   }
 
   HDTRefreshController _hdtRefreshController = HDTRefreshController();
-  late List orderedDateTime;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() => FutureBuilder<List>(
-          future: getFlowChartData(currentWPLC.cwpm.value.id),
+          future: getFlowChartData(currentWPLC.cwpm.value
+              .id), // use this ba, table will change on pt change, if want to limit data call, limit in function ba
           builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               return LayoutBuilder(
@@ -568,7 +305,7 @@ class _FlowChartState extends State<FlowChart> {
                   height: constraints.maxHeight,
                   child: HorizontalDataTable(
                     leftHandSideColumnWidth: 60,
-                    rightHandSideColumnWidth: numberOfDays * 60,
+                    rightHandSideColumnWidth: ecController.numberOfDays * 60,
                     isFixedHeader: true,
                     headerWidgets: _getTitleWidget(),
                     leftSideItemBuilder: _generateFirstColumn,
@@ -585,6 +322,7 @@ class _FlowChartState extends State<FlowChart> {
                     refreshIndicator: const WaterDropHeader(),
                     refreshIndicatorHeight: 30,
                     onRefresh: () {
+                      // getFlowChartData(currentWPLC.cwpm.value.id); <-- this line automatically called on refresh
                       setState(() {});
                       _hdtRefreshController.refreshCompleted();
                     },
@@ -593,7 +331,11 @@ class _FlowChartState extends State<FlowChart> {
                 );
               });
             } else {
-              return CircularProgressIndicator();
+              return Center(
+                  child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator()));
             }
           },
         ));

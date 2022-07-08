@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
+import 'package:mahospital/constants/firebase.dart';
 import 'package:mahospital/models/bed_model.dart';
 import 'package:mahospital/models/ward_model.dart';
 import 'package:mahospital/models/ward_pt_model.dart';
@@ -25,22 +26,120 @@ class CurrentWardPtsListController extends GetxController {
   TextEditingController dateCont = TextEditingController(text: '');
   TextEditingController timeCont = TextEditingController(text: '');
 
-  TextEditingController dnameCont = TextEditingController(text: '');
-  TextEditingController drnCont = TextEditingController(text: '');
-  TextEditingController dicCont = TextEditingController(text: '');
-  TextEditingController dageCont = TextEditingController(text: '');
-  TextEditingController ddobCont = TextEditingController(text: '');
-  TextEditingController daddCont = TextEditingController(text: '');
-  TextEditingController dsexCont = TextEditingController(text: '');
-  TextEditingController ddoaCont = TextEditingController(text: '');
-  TextEditingController ddodCont = TextEditingController(text: '');
-  TextEditingController dwardCont = TextEditingController(text: '');
-  TextEditingController dfdxCont = TextEditingController(text: '');
-  TextEditingController dfupCont = TextEditingController(text: '');
   TextEditingController dnoteCont = TextEditingController(text: '');
 
+  TextEditingController cpName = TextEditingController(text: '');
+  TextEditingController cpIc = TextEditingController(text: '');
+  TextEditingController cpDOB = TextEditingController(text: '');
+  TextEditingController cpRace = TextEditingController(text: '');
+  TextEditingController cpRNnos = TextEditingController(text: '');
+  TextEditingController cpAdd = TextEditingController(text: '');
+  TextEditingController cpaAts = TextEditingController(text: '');
+  TextEditingController cpdAts = TextEditingController(text: '');
+  TextEditingController cpCurDiag = TextEditingController(text: '');
+  TextEditingController cpCurPlan = TextEditingController(text: '');
+  Rx updatingPt = false.obs;
+  Rx updatingPtSum = false.obs;
+  List<bool> isSelected = [true, false, false];
 
   late pw.PageTheme theme;
+
+  Future<void> savePtSum() async {
+    updatingPtSum.value = true;
+    await wardPtRef.doc(cwpm.value.id).update({
+      'curDiag': cpCurDiag.text,
+      'curPlan': cpCurPlan.text,
+      'lastUpdatedBy': auth.currentUser!.uid,
+      'updatedAt': DateTime.now().millisecondsSinceEpoch,
+    }).then((_) {
+      updateCurrentWPM();
+      Get.snackbar("Success", 'Updated patient summary',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2));
+    }).catchError((e) {
+      print(e);
+      Get.snackbar("Error Updating patient summary", e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2));
+    });
+    updatingPtSum.value = false;
+  }
+
+  Future<void> updatePtDetails() async {
+    updatingPt.value = true;
+    await wardPtRef.doc(cwpm.value.id).update({
+      'name': cpName.text,
+      'ic': cpIc.text,
+      'dob': cpDOB.text,
+      'race': cpRace.text,
+      'rn': cpRNnos.text.split(',').map((rn) => rn.trim()).toList(),
+      'address': cpAdd.text,
+      'gender': isSelected.indexWhere((g) => g),
+      'lastUpdatedBy': auth.currentUser!.uid,
+      'updatedAt': DateTime.now().millisecondsSinceEpoch,
+    }).then((_) {
+      updateCurrentWPM();
+      Get.snackbar("Success", 'Updated patient data',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2));
+    }).catchError((e) {
+      print(e);
+      Get.snackbar("Error Updating patient data", e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2));
+    });
+    updatingPt.value = false;
+  }
+
+  void updatePtDetailsConts(WardPtModel model) {
+    isSelected = [false, false, false];
+    isSelected[model.genderIndex] = true;
+    cpName.text = model.name;
+    cpIc.text = model.icNumber;
+    cpDOB.text = model.birthDate;
+    cpRace.text = model.race;
+    cpRNnos.text = model.rnNos();
+    cpaAts.text = model.aAts();
+    cpdAts.text = model.dAts();
+    cpCurDiag.text = model.curDiag;
+    cpCurPlan.text = model.curPlan;
+    cpAdd.text = model.address;
+    ecController.start.value = model.entries.keys.length;
+    ecController.end.value = model.entries.keys.length;
+    // ecController.entries = model.entries; // how to update when new entry is added
+  }
+
+  void updateCurrentWPM() {
+    WardPtModel temporr = cwpm.value;
+    temporr.name = cpName.text;
+    temporr.icNumber = cpIc.text;
+    temporr.birthDate = cpDOB.text;
+    temporr.race = cpRace.text;
+    temporr.rNos = cpRNnos.text.split(',').map((rn) => rn.trim()).toList();
+    temporr.genderIndex = isSelected.indexWhere((g) => g);
+    temporr.curDiag = cpCurDiag.text;
+    temporr.curPlan = cpCurPlan.text;
+    temporr.address = cpAdd.text;
+    cwpm.value = temporr;
+    var index = _currentWardPtsModelList.indexWhere((wpm) {
+      return temporr.id == wpm.id;
+    });
+    _currentWardPtsModelList.replaceRange(index, index + 1, [temporr]);
+  }
+
+  void discDept(String deptId) {
+    WardPtModel temporr = cwpm.value;
+    temporr.activeDepts.remove(deptId);
+    var index = _currentWardPtsModelList.indexWhere((wpm) {
+      return temporr.id == wpm.id;
+    });
+    cwpm.value = temporr;
+    _currentWardPtsModelList.replaceRange(index, index + 1, [temporr]);
+  }
 
   Future<void> setPdfTheme() async {
     theme = await _myPageTheme();
@@ -49,10 +148,10 @@ class CurrentWardPtsListController extends GetxController {
   Future<pw.PageTheme> _myPageTheme() async {
     PdfPageFormat format = pf.PdfPageFormat.a4;
     format.applyMargin(
-        left: 1.0 * PdfPageFormat.cm,
-        top: 3.0 * PdfPageFormat.cm,
-        right: 1.0 * PdfPageFormat.cm,
-        bottom: 1.0 * PdfPageFormat.cm);
+        left: 0 * PdfPageFormat.cm,
+        top: 0 * PdfPageFormat.cm,
+        right: 0 * PdfPageFormat.cm,
+        bottom: 0 * PdfPageFormat.cm);
     return pw.PageTheme(
       pageFormat: format,
       theme: pw.ThemeData.withFont(
@@ -97,8 +196,9 @@ class CurrentWardPtsListController extends GetxController {
       if (currentBML[i].ptInitialised) {
         cbm.value = currentBML[i];
         cwpm.value = currentBML[i].wardPtModel;
-        ecController.entryData = [];
-        ecController.depts = [];
+        // ecController.entryData = [];
+        // ecController.depts = [];
+        updatePtDetailsConts(cwpm.value);
         break;
       }
     }
@@ -110,8 +210,9 @@ class CurrentWardPtsListController extends GetxController {
       if (currentBML[i].ptInitialised) {
         cbm.value = currentBML[i];
         cwpm.value = currentBML[i].wardPtModel;
-        ecController.entryData = [];
-        ecController.depts = [];
+        // ecController.entryData = [];
+        // ecController.depts = [];
+        updatePtDetailsConts(cwpm.value);
         break;
       }
     }

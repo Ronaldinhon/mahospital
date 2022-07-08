@@ -43,6 +43,7 @@ class BedListTile extends StatelessWidget {
           if (wBed.ptInitialised) {
             currentWPLC.cbm.value = wBed;
             currentWPLC.cwpm.value = wBed.wardPtModel;
+            currentWPLC.updatePtDetailsConts(wBed.wardPtModel);
           }
 
           wBed.ptInitialised

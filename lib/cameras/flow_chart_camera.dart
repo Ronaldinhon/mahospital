@@ -116,9 +116,12 @@ class FlowChartCameraState extends State<FlowChartCamera> {
       if (isNumeric(bl.text)) {
         var coords = bl.cornerPoints.reduce((i, j) => i + j);
         numbers.add(NumberWithCoor(bl.text, coords / 4));
-      } else if (idenTexts.contains(bl.text)) {
+        // } else if (idenTexts.contains(bl.text)) {
+      } else if (idenTexts.any((item) => bl.text.contains(item))) {
+        // damn - fixed. im a genius
         var coords = bl.cornerPoints.reduce((i, j) => i + j);
-        identifiers.add(TextWithCoor(bl.text, coords / 4));
+        var idenParam = idenTexts.firstWhere((item) => bl.text.contains(item));
+        identifiers.add(TextWithCoor(idenParam, coords / 4));
       }
     }
     if (identifiers.isNotEmpty) {

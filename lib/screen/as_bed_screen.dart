@@ -120,7 +120,7 @@ class _AsBedScreenState extends State<AsBedScreen> {
     Text message = Text('All beds have been updated');
     bedIds.removeWhere((value) => value == '');
     print(bedIds);
-    wardRef.doc(ward.id).update({'bedIdList': bedIds});
+    wardRef.doc(ward.id).update({'bedIdList': bedIds}); // i think must limit only ward owner can change beds
     if (errorList.isNotEmpty) {
       message = Text('Error occured when updating bed ${errorList.join(', ')}');
       ScaffoldMessenger.of(context).showSnackBar(

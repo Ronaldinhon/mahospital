@@ -49,7 +49,7 @@ class AuthController extends GetxController {
   }
 
   void _setInitialScreen(User? user) {
-    // auth.setPersistence(Persistence.SESSION);
+    auth.setPersistence(Persistence.SESSION);
     if (user == null) {
       Get.offAll(() => LoginScreen());
     } else if (!user.emailVerified) {

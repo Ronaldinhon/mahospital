@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
@@ -16,14 +17,14 @@ class RevEnt extends StatefulWidget {
 class _RevEntState extends State<RevEnt> {
   late String uid;
 
-  final List<String> deptShortcut = [
-    '',
-    'Med',
-    'Surg',
-    'O+G',
-    'Peads',
-    'Ortho',
-  ];
+  // final List<String> deptShortcut = [
+  //   '',
+  //   'Med',
+  //   'Surg',
+  //   'O+G',
+  //   'Peads',
+  //   'Ortho',
+  // ];
 
   final List<String> deptScut = [
     'Med',
@@ -101,70 +102,139 @@ class _RevEntState extends State<RevEnt> {
   late String dateInUTC;
   late Map mapEntry;
 
+  final HttpsCallable addEntry = FirebaseFunctions.instance.httpsCallable(
+    'addEntry',
+  );
+
   void saveEntry() async {
+    print('here bitch');
+    print(ecController.deptId.value);
     if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
       dateInUTC = DateTime.now().millisecondsSinceEpoch.toString();
       mapEntry = {
         'byId': uid,
-        'dept': ecController.deptId.value.trim(),
-        'data': ecController.mainEditor.text.trim(),
-        'createdAt': dateInUTC,
-        'updatedAt': dateInUTC
+        'dept': ecController.deptId
+            .value, // add trim() here send empty string causing problem... wtf
+        'entry': ecController.mainEditor.text.trim(),
+        'createdAt': ecController.editId.isNotEmpty
+            ? int.parse(ecController.editId.value)
+            : int.parse(dateInUTC),
+        'updatedAt': int.parse(dateInUTC)
       };
       ecController.savingEntry.value = true;
-      _formKey.currentState!.save();
-      DocumentSnapshot eSS = await entryCol.get();
-      // String dateInUTC = DateTime(selectedDate.year, selectedDate.month,
-      //         selectedDate.day, selectedTime.hour, selectedTime.minute)
-      //     .millisecondsSinceEpoch
-      //     .toString();
-      if (eSS.exists) {
-        Map<String, dynamic> entries = eSS.get('entries');
-        entries[dateInUTC] = mapEntry;
 
-        entryCol.update({'entries': entries}).then((v) {
-          // i think must put in function next time (below update active dept)
-          if (!currentWPLC.cwpm.value.activeDepts
-              .contains(ecController.deptId.value.trim())) {
-            var listDept = currentWPLC.cwpm.value.activeDepts;
-            listDept.add(ecController.deptId.value.trim());
-            wardPtRef
-                .doc(currentWPLC.cwpm.value.id)
-                .update({'deptIds': listDept});
-          }
-          currentWPLC.cwpm.value.entries[dateInUTC] = mapEntry;
-          currentWPLC.cwpm.value.latestEntry = mapEntry;
-          ecController.deptId.value = '';
-          ecController.mainEditor.text = '';
-          ecController.savingEntry.value = false;
-          // need to update record tab? - need
-          // below also same
-        });
-      } else {
-        entryCol.set({
-          'entries': {dateInUTC: mapEntry}
-        }).then((v) {
+      // print(ecController.editId.value.isNotEmpty);
+
+      await addEntry.call(<String, dynamic>{
+        'byId': uid,
+        'ptId': currentWPLC.cwpm.value.id,
+        'dept': ecController.deptId.value,
+        'entry': ecController.mainEditor.text.trim(),
+        'createdAt': ecController.editId.isNotEmpty
+            ? int.parse(ecController.editId.value)
+            : int.parse(dateInUTC),
+        'updatedAt': int.parse(dateInUTC),
+        'isEdit': ecController.editId.value.isNotEmpty
+      }).then((v) {
+        bool success = v.data as bool;
+        // print('heeeerejoireojero');
+        // print(v.data);
+        if (success) {
+          Get.snackbar('Done', 'Entry added',
+              backgroundColor: Colors.green,
+              snackPosition: SnackPosition.BOTTOM,
+              duration: Duration(seconds: 2));
           updateLocalController();
-        });
-      }
+        } else {
+          Get.snackbar('Failed', 'Could not add entry',
+              backgroundColor: Colors.red,
+              snackPosition: SnackPosition.BOTTOM,
+              duration: Duration(seconds: 2));
+        }
+        ecController.savingEntry.value = false;
+      }).catchError((e) {
+        print(e);
+        Get.snackbar(
+          'Error adding entry',
+          e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+        );
+        ecController.savingEntry.value = false;
+      });
+
+      // DocumentSnapshot eSS = await entryCol.get();
+      // // String dateInUTC = DateTime(selectedDate.year, selectedDate.month,
+      // //         selectedDate.day, selectedTime.hour, selectedTime.minute)
+      // //     .millisecondsSinceEpoch
+      // //     .toString();
+      // if (eSS.exists) {
+      //   Map<String, dynamic> entries = eSS.get('entries');
+      //   entries[ecController.editId.isNotEmpty
+      //       ? ecController.editId.value
+      //       : dateInUTC] = mapEntry;
+
+      //   entryCol.update({'entries': entries}).then((v) {
+      //     // i think must put in function next time (below update active dept)
+      //     if (ecController
+      //             .editId.isEmpty && // if edit no need update active dept list
+      //         !currentWPLC.cwpm.value.activeDepts
+      //             .contains(ecController.deptId.value.trim())) {
+      //       var listDept = currentWPLC.cwpm.value.activeDepts;
+      //       listDept.add(ecController.deptId.value.trim());
+      //       wardPtRef
+      //           .doc(currentWPLC.cwpm.value.id)
+      //           .update({'deptIds': listDept});
+      //     }
+      //     currentWPLC.cwpm.value.entries[dateInUTC] = mapEntry;
+      //     if (ecController.editId.isEmpty) {
+      //       currentWPLC.cwpm.value.latestEntry =
+      //           mapEntry; // soon ward pt case summary to replace latestEntry
+      //       currentWPLC.cwpm.value.orderedDateTime
+      //           .insert(0, int.parse(dateInUTC));
+      //     }
+      //     ecController.deptId.value = '';
+      //     ecController.mainEditor.text = '';
+      //     ecController.editId.value = '';
+      //     ecController.savingEntry.value = false;
+      //     // need to update record tab? - need
+      //     // below also same
+      //   });
+      // } else {
+      //   entryCol.set({
+      //     'entries': {dateInUTC: mapEntry}
+      //   }).then((v) {
+      //     updateLocalController();
+      //   });
+      // }
+
     }
   }
 
   void updateLocalController() {
     var wmph = currentWPLC.cwpm.value; // wardModelPlaceHolder
-    if (!wmph.activeDepts.contains(dept)) {
+    // if is not edit then only update active dept
+    if (ecController.editId.isEmpty && !wmph.activeDepts.contains(dept)) {
       var listDept = wmph.activeDepts;
       listDept.add(dept);
       wardPtRef.doc(wmph.id).update({'deptIds': listDept});
     }
-    if (wmph.rerIni)
+    if (wmph.rerIni) {
       wmph.entries[dateInUTC] = mapEntry;
-    else
+      if (ecController.editId.isEmpty)
+        currentWPLC.cwpm.value.orderedDateTime
+            .insert(0, int.parse(dateInUTC)); // need to find this out
+    } else {
       wmph.entries = {dateInUTC: mapEntry};
+      currentWPLC.cwpm.value.orderedDateTime = [int.parse(dateInUTC)];
+    }
     wmph.latestEntry = mapEntry;
     wmph.rerIni = true;
     dept = '';
     ecController.mainEditor.text = '';
+    ecController.editId.value = '';
+    ecController.deptId.value = '';
     ecController.savingEntry.value = false;
     userListController.addUser(userController.user);
   }
@@ -188,6 +258,13 @@ class _RevEntState extends State<RevEnt> {
             child: ListView(
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(ecController.editId.isEmpty ? 'New Entry' : 'Edit Entry'),
+                SizedBox(
+                  height: 10,
+                ),
+                // IgnorePointer(
+                //   ignoring: ecController.editId.isNotEmpty,
+                //   child:
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(labelText: 'Dept'),
                   style: TextStyle(color: Colors.black),
@@ -206,10 +283,12 @@ class _RevEntState extends State<RevEnt> {
                   },
                   onChanged: (val) {
                     // setState(() => dept = val!);
+                    // print(val);
                     ecController.deptId.value = val!;
-                    print(ecController.deptId.value);
+                    print(ecController.deptId.value.trim());
                   },
                 ),
+                // ),
                 SizedBox(
                   height: 4,
                 ),
@@ -322,8 +401,10 @@ class _RevEntState extends State<RevEnt> {
                                   focusNode: focusNode,
                                   controller: controller,
                                   key: ValueKey('entry'),
-                                  onChanged: (yes) =>
-                                      ecController.checkOnChange(),
+                                  onChanged: (yes) {
+                                    print('sahs');
+                                    ecController.checkOnChange();
+                                  },
                                   onEditingComplete: onEditingComplete,
                                   validator: (val) {
                                     if (val!.trim().isEmpty) {
@@ -418,13 +499,25 @@ class _RevEntState extends State<RevEnt> {
                 ),
                 !ecController.savingEntry.value
                     ? ElevatedButton(
-                        child: Text('Save'),
+                        child: Text(ecController.editId.isNotEmpty
+                            ? 'Save Edit'
+                            : 'Save'),
                         onPressed: () => saveEntry(),
                       )
                     : CircularProgressIndicator(),
                 SizedBox(
                   height: 4,
                 ),
+                ecController.editId.isNotEmpty
+                    ? ElevatedButton(
+                        child: Text('Cancel Edit'),
+                        onPressed: () {
+                          ecController.editId.value = '';
+                          ecController.deptId.value = '';
+                          ecController.mainEditor.text = '';
+                        },
+                      )
+                    : Container()
               ],
             ),
           ),

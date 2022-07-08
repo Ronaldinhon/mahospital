@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:mahospital/constants/controllers.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class EntryChartController extends GetxController {
@@ -18,12 +20,16 @@ class EntryChartController extends GetxController {
 
   RxList<bool> isSelected = [
     false,
-    false,
-    false,
-    false,
-    false,
+  ].obs;
+
+  RxList<bool> isSelected1 = [
     false,
   ].obs;
+
+  RxInt start = 10000.obs;
+  RxInt end = 10000.obs;
+
+  RxString editId = ''.obs;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -31,17 +37,52 @@ class EntryChartController extends GetxController {
   final ItemScrollController itemScrollController1 = ItemScrollController();
   final ItemPositionsListener itemPositionsListener1 =
       ItemPositionsListener.create();
-  List<String> depts = [];
+  RxList<String> depts = [''].obs;
+  List<String> deptList = [];
   List<String> entryData = [];
   List<int> searchedIndexes = [];
+  List<int> searchedIndexes1 = [];
   final FocusNode fc = FocusNode();
   final FocusNode fc1 = FocusNode();
   final searchCont = TextEditingController();
+  final searchCont1 = TextEditingController();
+  final pgCodeCont = TextEditingController();
+  RxBool printingRec = false.obs;
+  RxBool printingSum = false.obs;
+  RxBool printingDisc = false.obs;
+  RxBool printingFC = false.obs;
+  RxBool entryFC = false.obs;
+  RxBool editFCparam = false.obs;
+  RxBool editFcEntry = false.obs;
+  RxInt initialRows = 8.obs;
+  // Map<dynamic, dynamic> entries = {};
 
   // ItemScrollController checkISC() {
   //   if (itemScrollController.isAttached)
   //   // itemPositionsListener.i
   // }
+
+  List<List<String>> wer =
+      []; // it seems that im saving it as string, then it can be saved as an empty string
+  int numberOfDays = 0;
+  List<int> ascNum = [];
+  List orderedDateTime = [];
+  Map<String, List<String>> masterMap = {};
+
+  late ByteData? bb;
+  late ByteData? cc;
+
+  List<String> bloodParam = [
+    'Hb',
+    'Hct',
+    'Plt',
+    'Twc',
+    'Na',
+    'K',
+    'Cl',
+    'Urea',
+    'Creat',
+  ];
 
   final Map<String, String> medScut = {
     'pw': 'present with',
@@ -58,6 +99,33 @@ class EntryChartController extends GetxController {
         'no need to trace shit anymore, everything is at your finger tip.',
     'dni': 'DIL NAR issued, patient family understood'
   };
+
+  void makeStart(int index) {
+    start.value = index;
+    if (end.value == index) removeEnd();
+  }
+
+  void removeStart() => start.value = currentWPLC.cwpm.value.entries.length;
+
+  void makeEnd(int index) {
+    end.value = index;
+    if (start.value == index) removeStart();
+  }
+
+  void removeEnd() => end.value = currentWPLC.cwpm.value.entries.length;
+
+  void falsifyIS(List<bool> sell) {
+    // isSelected.value = List.generate(isSelected.length, (i) => false);
+    sell = List.generate(sell.length, (i) => false);
+  }
+
+  void setupDepts() {
+    depts.value = deptList.toSet().toList();
+    isSelected.value = List.generate(depts.length, (i) => false);
+    isSelected1.value = List.generate(depts.length, (i) => false);
+    // start.value = deptList.length;
+    // end.value = deptList.length;
+  }
 
   void insertText(String inserted) {
     // print(fc1.hasFocus);
@@ -144,28 +212,66 @@ class EntryChartController extends GetxController {
     }
   }
 
-  void searchData(String keyWord) {
+  void searchData(String keyWord, ItemScrollController isc,
+      ItemPositionsListener ipc, List<bool> sell) {
     searchedIndexes = [];
-    entryData.asMap().forEach((i, element) {
-      for (var i = 0; i < element.length; i++) {
-        if (element[i].contains(keyWord)) {
-          searchedIndexes.add(i);
-          break;
-        }
-      }
-    });
-    itemScrollController.scrollTo(
-        index: searchedIndexes[0], duration: Duration(milliseconds: 150));
-  }
-
-  void searchDept(String dept) {
-    searchedIndexes = [];
-    for (var i = 0; i < depts.length; i++) {
-      if (depts[i] == dept) {
+    falsifyIS(sell);
+    // var dd = [];
+    // entryData.forEach(
+    // (s) => dd.add(s.toUpperCase().contains(keyWord.toUpperCase())));
+    // print(entryData.length); // not reliable
+    // print(currentWPLC.cwpm.value.entries.length);
+    currentWPLC.cwpm.value.entryDataList.asMap().forEach((i, element) {
+      if (element.toUpperCase().contains(keyWord.toUpperCase())) {
         searchedIndexes.add(i);
       }
+    });
+    print(searchedIndexes);
+    if (searchedIndexes.isNotEmpty)
+      isc.scrollTo(
+          index: searchedIndexes[0], duration: Duration(milliseconds: 150));
+  }
+
+  void upSearch(ItemScrollController isc, ItemPositionsListener ipc) {
+    print(searchedIndexes);
+    int currentPos = ipc.itemPositions.value.first.index;
+    if (searchedIndexes.length >= 2) {
+      int intTo = searchedIndexes.reversed
+          .firstWhere((ind) => ind < currentPos, orElse: () => -1);
+      if (intTo > -1) {
+        isc.scrollTo(index: intTo, duration: Duration(milliseconds: 150));
+      }
     }
-    itemScrollController.scrollTo(
-        index: searchedIndexes[0], duration: Duration(milliseconds: 200));
+  }
+
+  void downSearch(ItemScrollController isc, ItemPositionsListener ipc) {
+    print(searchedIndexes);
+    int currentPos = ipc.itemPositions.value.first.index;
+    if (searchedIndexes.length >= 2) {
+      int intTo = searchedIndexes.firstWhere((ind) => ind > currentPos,
+          orElse: () => -1);
+      if (intTo > -1) {
+        isc.scrollTo(index: intTo, duration: Duration(milliseconds: 150));
+      }
+    }
+  }
+
+  void searchDept(
+      String dept, ItemScrollController isc, ItemPositionsListener ipc) {
+    searchedIndexes = [];
+    // for (var i = 0; i < deptList.length; i++) {
+    //   if (deptList[i] == dept) {
+    //     searchedIndexes.add(i);
+    //   }
+    // }
+    print(dept);
+    print(currentWPLC.cwpm.value.entryDeptList);
+    currentWPLC.cwpm.value.entryDeptList.asMap().forEach((i, element) {
+      if (element == dept) {
+        searchedIndexes.add(i);
+      }
+    });
+    isc.scrollTo(
+        index: searchedIndexes[0], duration: Duration(milliseconds: 150));
   }
 }

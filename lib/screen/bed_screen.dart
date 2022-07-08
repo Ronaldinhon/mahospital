@@ -376,6 +376,8 @@ class _BedScreenState extends State<BedScreen> {
         'hospId': widget.ward.hospId,
         'admittedAt': [doAdCont.text],
         'dischargedAt': [],
+        'curDiag': '',
+        'curPlan': '',
         'createdAt': DateTime.now().millisecondsSinceEpoch,
         'updatedAt': DateTime.now().millisecondsSinceEpoch,
       }).then((DocumentReference<Object?> pt) async {

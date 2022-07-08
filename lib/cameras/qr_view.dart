@@ -40,22 +40,41 @@ class _QrViewState extends State<QrView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('QR Scan'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            flex: 6,
-            child: QRView(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('QR Scan'),
+        ),
+        body: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            // Expanded(
+            //   flex: 6,
+            //   child:
+            // ),
+            QRView(
               key: qrKey,
               onQRViewCreated: _onQRViewCreated,
+              overlay: QrScannerOverlayShape(
+                  cutOutSize: MediaQuery.of(context).size.width * 0.7,
+                  borderRadius: 10,
+                  borderLength: 20,
+                  borderWidth: 10,
+                  borderColor: Theme.of(context).primaryColorLight),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(lol),
+            Positioned(
+              bottom: 20,
+              child: Text(
+                lol,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+
+            // Expanded(
+            //   flex: 1,
+            //   child: Text(lol),
+            // )
+
             // Column(
             //   mainAxisSize: MainAxisSize.min,
             //   children: [
@@ -66,8 +85,8 @@ class _QrViewState extends State<QrView> {
             //     )
             //   ],
             // ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/controllers/auth_controller.dart';
+import 'package:mahospital/screen/reset_pw_screen.dart';
 import 'package:mahospital/screen/signup_screen.dart';
 // import 'package:mahospital/provider/auth_model.dart';
 // import 'package:provider/provider.dart';
@@ -67,7 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _formKey.currentState!.save();
       if (await authController.signIn()) {
         setState(() => _isLoading = false);
-      }
+      } else
+        setState(() => _isLoading = false);
     }
   }
 
@@ -172,7 +174,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             primary: Theme.of(context).primaryColor),
                         onPressed: () => Get.to(SignupScreen()),
                         child: Text('Create an account'),
-                      )
+                      ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                          primary: Theme.of(context).primaryColor),
+                      onPressed: () => Get.to(ResetPWScreen()),
+                      child: Text('Reset Password'),
+                    )
                   ],
                 ),
               ),

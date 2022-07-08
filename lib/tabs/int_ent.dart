@@ -65,9 +65,9 @@ class _IntEntState extends State<IntEnt> {
       });
   }
 
-  TimeOfDay selectedTime = TimeOfDay.now();
-
   Future<void> _selectTime(BuildContext context) async {
+    TimeOfDay selectedTime = TimeOfDay.now();
+    final now = new DateTime.now();
     final TimeOfDay? pickedS = await showTimePicker(
       context: context,
       initialTime: selectedTime,
@@ -82,8 +82,14 @@ class _IntEntState extends State<IntEnt> {
     if (pickedS != null && pickedS != selectedTime)
       setState(() {
         selectedTime = pickedS;
-        currentWPLC.timeCont.text =
-            pickedS.hour.toString() + ':' + pickedS.minute.toString();
+        var nowTime = DateTime(now.year, now.month, now.day, selectedTime.hour,
+            selectedTime.minute);
+        currentWPLC.timeCont.text = DateFormat('kk:mm').format(nowTime);
+        // pickedS.hour.toString() + ':' + pickedS.minute.toString();
+      });
+    else
+      setState(() {
+        currentWPLC.timeCont.text = DateFormat('kk:mm').format(now);
       });
   }
 

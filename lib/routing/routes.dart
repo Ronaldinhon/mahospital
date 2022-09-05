@@ -19,6 +19,7 @@ const profilePageDisplayName = "Profile";
 const profilePageRoute = "/profile";
 
 const asHospPageRoute = "/as_hosp";
+const signChopRoute = "/sign_chop";
 
 // const authenticationPageDisplayName = "Log out";
 // const errorPageRoute = "/404";

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/page_format.dart' as pf;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+
+import '../controllers/entry_chart_controller.dart';
 // import 'package:flutter_downloader/flutter_downloader.dart';
 // import 'package:permission_handler/permission_handler.dart';
 
@@ -24,10 +27,13 @@ class _WardPdfState extends State<WardPdf> {
   late nat.PdfController pdfController;
   bool initDownload = false;
   final pdf = pw.Document();
+  final pdf1 = pw.Document();
   List<BedModel> sample = [];
   List<String> data = [];
   List<String> showData = [];
   String holder = '';
+  Base64Codec st = Base64Codec();
+  Codec<String, String> stringToBase64 = utf8.fuse(base64);
 
   @override
   void initState() {
@@ -38,17 +44,66 @@ class _WardPdfState extends State<WardPdf> {
       data.add(bm.name);
       data.add(!bm.ptInitialised ? 'No Patient' : bm.wardPtModel.ptDetails());
       if (!bm.ptInitialised) {
-        data.add('_____________________________________________________________________________________________\n');
+        data.add(
+            '_____________________________________________________________________________________________\n');
       } else {
         data.add('Diag:');
         data.addAll(bm.wardPtModel.curDiag.split('\n'));
         data.add('Plan:');
         data.addAll(bm.wardPtModel.curPlan.split('\n'));
-        data.add('_____________________________________________________________________________________________\n');
+        data.add(
+            '_____________________________________________________________________________________________\n');
       }
     }
     separatePages();
     showData.asMap().forEach((index, value) => addPdfPgFunc(index));
+    pdf1.addPage(pw.MultiPage(
+        maxPages: 50,
+        pageFormat: pf.PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return <pw.Widget>[
+            pw.Table(
+                border: pw.TableBorder.all(color: PdfColor.fromHex("#000000")),
+                children: ecController.asdljk.map((Pt value) {
+                  return pw.TableRow(children: [
+                    pw.Container(
+                        width: 15,
+                        padding: pw.EdgeInsets.all(4.0),
+                        child: pw.Text(stringToBase64.decode(
+                            st.normalize(stringToBase64.encode(value.hNum))))),
+                    pw.Container(
+                        width: 30,
+                        padding: pw.EdgeInsets.all(4.0),
+                        child: pw.Text(stringToBase64.decode(
+                            st.normalize(stringToBase64.encode(value.name))))),
+                    pw.Container(
+                        width: 30,
+                        padding: pw.EdgeInsets.all(4.0),
+                        child: pw.Text(stringToBase64.decode(
+                            st.normalize(stringToBase64.encode(value.ic))))),
+                    pw.Container(
+                        width: 70,
+                        padding: pw.EdgeInsets.all(4.0),
+                        child: pw.Text(stringToBase64.decode(
+                            st.normalize(stringToBase64.encode(value.add))))),
+                    pw.Container(
+                        width: 30,
+                        padding: pw.EdgeInsets.all(4.0),
+                        child: pw.Text(stringToBase64.decode(
+                            st.normalize(stringToBase64.encode(value.phone))))),
+                    // pw.Container(
+                    //     width: 30,
+                    //     padding: pw.EdgeInsets.all(4.0),
+                    //     child: pw.Column(
+                    //         crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    //         children: [
+                    //           pw.Text(
+                    //               'asaslkdjlksdsdlkjlskjslkjdlkjsdlksljdsdljslkdslkdslkdllksldslkdlkdsklsdlklksjlkjsdlkjslkdjsldkjsksdlkjlsdkjlskjlksdjlksdjlksjlkjsdlkjsdlksjdlksdjlslkjldkjslkjsk')
+                    //         ])),
+                  ]);
+                }).toList()),
+          ];
+        }));
   }
 
   void addPdfPgFunc(int i) {
@@ -149,7 +204,7 @@ class _WardPdfState extends State<WardPdf> {
         ),
         Expanded(
           child: PdfPreview(
-            build: (format) => pdf.save(),
+            build: (format) => pdf1.save(),
           ),
         )
       ],

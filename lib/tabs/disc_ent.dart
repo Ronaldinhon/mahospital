@@ -316,7 +316,7 @@ class _DiscEntState extends State<DiscEnt> {
           // ),
           TextFormField(
             key: ValueKey('Disc Sum'),
-            controller: currentWPLC.dnoteCont,
+            // controller: currentWPLC.dnoteCont,
             keyboardType: TextInputType.multiline,
             maxLines: null,
             onChanged: (String sj) {
@@ -352,6 +352,10 @@ class _DiscEntState extends State<DiscEnt> {
             decoration: InputDecoration(
               labelText: 'Disc Sum',
             ),
+            initialValue: ecController.asdljk
+                .map((pls) =>
+                    '${pls.hNum}\n${pls.name}\n${pls.ic}\n${pls.phone}\n${pls.add}')
+                .join('\n\n'),
           ),
           SizedBox(
             height: 4,

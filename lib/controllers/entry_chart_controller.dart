@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import '../screen/bed_screen.dart';
+
 class EntryChartController extends GetxController {
   static EntryChartController instance = Get.find();
   RxMap<String, dynamic> ixResults = Map<String, dynamic>().obs;
@@ -72,6 +74,8 @@ class EntryChartController extends GetxController {
   late ByteData? bb;
   late ByteData? cc;
 
+  List<Pt> asdljk = [];
+
   List<String> bloodParam = [
     'Hb',
     'Hct',
@@ -83,6 +87,9 @@ class EntryChartController extends GetxController {
     'Urea',
     'Creat',
   ];
+
+  Map<String, String> ecCorrespondKeys = {};
+  List<String> ecIdenTexts = [];
 
   final Map<String, String> medScut = {
     'pw': 'present with',
@@ -274,4 +281,14 @@ class EntryChartController extends GetxController {
     isc.scrollTo(
         index: searchedIndexes[0], duration: Duration(milliseconds: 150));
   }
+}
+
+class Pt {
+  late String hNum;
+  late String name;
+  late String ic;
+  late String phone;
+  late String add;
+
+  Pt(this.hNum, this.name, this.ic, this.phone, this.add);
 }

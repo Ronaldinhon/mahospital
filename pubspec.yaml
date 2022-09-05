@@ -80,6 +80,13 @@ dependencies:
   number_display: ^3.0.0
   image: ^3.1.0
   hand_signature: ^2.1.1
+  flutter_tesseract_ocr: ^0.4.20 
+  flutter_masked_text: ^0.8.0
+  # unorm_dart: ^0.2.0
+  # normalizer: ^0.0.2+3
+  # string_validator: ^0.3.0
+  carousel_slider: ^4.1.1
+  smooth_page_indicator: ^1.0.0+2
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -105,6 +112,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/tessdata/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

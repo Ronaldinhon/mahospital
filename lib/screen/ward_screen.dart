@@ -15,6 +15,7 @@ import 'package:mahospital/models/ward_pt_model.dart';
 import '/widget/bed_list_tile.dart';
 import 'as_bed_screen.dart';
 import 'bed_screen.dart';
+import 'pt_screen.dart';
 
 class WardScreen extends StatefulWidget {
   final WardModel ward;
@@ -44,7 +45,7 @@ class _WardScreenState extends State<WardScreen> {
     super.initState();
   }
 
-  Future<List<BedListTile>> getBedsForWS() async {
+  Future<List<BedExpansionTile>> getBedsForWS() async {
     // QuerySnapshot<Object?> st =
     //     await wardRef.doc(widget.wardId).get().then((qward) {
     //   ward = qward;
@@ -74,8 +75,9 @@ class _WardScreenState extends State<WardScreen> {
     // return localBedModels;
   }
 
-  List<BedListTile> createBedsList(List<BedModel> bedModelList) {
-    List<BedListTile> wBeds = [];
+  List<BedExpansionTile> createBedsList(List<BedModel> bedModelList) {
+    // List<BedListTile> wBeds = [];
+    List<BedExpansionTile> wBeds = [];
     if (bedModelList.isNotEmpty) {
       var prevWardPtId;
       bedModelList.asMap().forEach((index, bedModel) {
@@ -84,14 +86,41 @@ class _WardScreenState extends State<WardScreen> {
             wpModels.add(bedModel.wardPtModel);
             prevWardPtId = bedModel.ptId;
           }
-          // print(bedModel.ptId.isNotEmpty ? bedModel.wardPtModel : 'empty');
-          BedListTile bedTile = BedListTile(
-            bedModel,
-            wardModel,
-            index,
-            prevWardPtId,
+          // BedListTile bedTile = BedListTile(
+          //   bedModel,
+          //   wardModel,
+          //   index,
+          //   prevWardPtId,
+          // );
+          // wBeds.add(bedTile);
+          BedExpansionTile lkj = BedExpansionTile(
+            bedModel.name,
+            'Pt: ' +
+                (bedModel.ptInitialised
+                    ? bedModel.wardPtModel.ptDetails()
+                    : '-'),
+            false,
+            () {
+              print('hey');
+              if (bedModel.ptInitialised) {
+                currentWPLC.cbm.value = bedModel;
+                currentWPLC.cwpm.value = bedModel.wardPtModel;
+                currentWPLC.updatePtDetailsConts(bedModel.wardPtModel);
+              }
+
+              bedModel.ptInitialised
+                  ? Get.to(PtScreen())
+                  : !bedModel.error
+                      ? Get.to(BedScreen(bedModel, wardModel))
+                      : Get.snackbar(
+                          "Error retrieving patient data",
+                          'Please refresh ward page.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                        );
+            },
           );
-          wBeds.add(bedTile);
+          wBeds.add(lkj);
         }
       });
       currentWPLC.setCurrentPtsList(wpModels);
@@ -115,125 +144,305 @@ class _WardScreenState extends State<WardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<BedListTile>>(
-        future: getBedsForWS(),
-        builder:
-            (BuildContext context, AsyncSnapshot<List<BedListTile>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Scaffold(
-                key: _scaffoldKey,
-                appBar: AppBar(
-                  title: Text('Ward (${wardModel.name})'),
-                ),
-                backgroundColor: Theme.of(context).primaryColor,
-                body: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 500),
-                    child: Card(
-                      margin: EdgeInsets.all(20),
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.only(
-                            top: 15, bottom: 15, left: 15, right: 15),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                ElevatedButton(
-                                    child: Text('Refresh'),
-                                    // onPressed: () => updateWM()
-                                    onPressed: () => setState(() {})
-                                    // async {
-                                    //   showLoading();
-                                    //   Navigator.of(context).pushReplacement(
-                                    //     MaterialPageRoute(
-                                    //       builder: (c) {
-                                    //         return WardScreen(widget.wardId);
-                                    //       },
-                                    //     ),
-                                    //   );
-                                    // },
-                                    )
-                              ],
-                            ),
-                            CircleAvatar(
-                                radius: 45,
-                                backgroundColor: Color(0xffdadada),
-                                backgroundImage:
-                                    NetworkImage(wardModel.imageUrl)),
-                            SizedBox(
-                              height: 8,
-                            ),
-                            Text("${wardModel.shortName}"),
-                            Text("${wardModel.description}"),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Beds',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 25),
-                                  textAlign:
-                                      TextAlign.left, //dunno got use or not
-                                ),
-                                SizedBox(width: 5),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.edit,
-                                    color: Colors.black,
-                                  ),
-                                  onPressed: () {
-                                    // Get.to(BedScreen(wardModel));
-                                    Get.to(AsBedScreen(wardModel));
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //       builder: (context) => AsBedScreen(
-                                    //           wardModel.id, localBedModels)),
-                                    // );
-                                  },
-                                )
-                              ],
-                            ),
-                            if (snapshot.data!.isNotEmpty)
-                              SizedBox(
-                                height: 5,
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text('Ward (${wardModel.name})'),
+      ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        minimum: EdgeInsets.all(10),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 500),
+          child: Column(
+            children: [
+              ExpansionTile(
+                title: Text('Ward Details',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                children: [
+                  CircleAvatar(
+                      radius: 45,
+                      backgroundColor: Color(0xffdadada),
+                      backgroundImage: NetworkImage(wardModel.imageUrl)),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text("${wardModel.shortName}"),
+                          Text("${wardModel.description}"),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {},
+                      )
+                    ],
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(width: 20),
+                  Text(
+                    'Beds',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                    textAlign: TextAlign.left, //dunno got use or not
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      // Get.to(BedScreen(wardModel));
+                      Get.to(AsBedScreen(wardModel));
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.refresh),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.print),
+                    onPressed: () {}, // goes to another page
+                  ),
+                ],
+              ),
+
+              SizedBox(
+                height: 5,
+              ),
+              // ConstrainedBox(
+              //     constraints: BoxConstraints(maxHeight: 300),
+              //     child: GridView(
+              //       gridDelegate:
+              //           SliverGridDelegateWithFixedCrossAxisCount(
+              //         crossAxisCount:
+              //             ResponsiveWidget.isSmallScreen(context)
+              //                 ? 2
+              //                 : 3,
+              //       ),
+              //       children: <Widget>[...?snapshot.data],
+              //     ))
+              FutureBuilder<List<BedExpansionTile>>(
+                  future: getBedsForWS(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<BedExpansionTile>> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return Expanded(
+                          flex: 1,
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: snapshot.data!,
+                          ));
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  })
+              // if (snapshot.data!.isNotEmpty)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BedExpansionTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool checked;
+  final void Function() checkFn;
+  // final vslist = ['HR', 'SYS', 'DIA', 'RR', 'O2', 'Temp', 'Notes'].asMap().forEach((i, v) => vsList.add(
+  //       VsTextField(v, sendDataMap, saveData, i == (vitalsTitle.length - 1))));
+
+  BedExpansionTile(this.title, this.subtitle, this.checked, this.checkFn);
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      title: Text(title, overflow: TextOverflow.ellipsis),
+      subtitle: Text(subtitle, overflow: TextOverflow.ellipsis),
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            child: checked
+                ? Icon(Icons.check_box, size: 20)
+                : Icon(Icons.check_box_outline_blank, size: 20),
+            onTap: () => print(ecController.asdljk),
+          ),
+          SizedBox(width: 10),
+          GestureDetector(
+            child: Icon(Icons.file_open, size: 20),
+            onTap: checkFn,
+          ),
+        ],
+      ),
+      children: [
+        SizedBox(height: 10),
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: 120,
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(6),
+            reverse: false,
+            child: TextFormField(
+              key: ValueKey('diagnosis'),
+              // controller: currentWPLC.cpCurDiag,
+              // onChanged: (yes) => ecController.checkOnChange(),
+              initialValue:
+                  'lkj \nasd \nlkj \nasdlkj \nasdlkj \nasdlkj \nasdlkj \nasdlkj \nasd \nasdlkj \nasd',
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 1.0),
+                  ),
+                  labelText: 'Diagnosis',
+                  contentPadding: const EdgeInsets.all(4.0),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.save),
+                    onPressed: () {},
+                  )),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: 120,
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(6),
+            reverse: false,
+            child: TextFormField(
+              key: ValueKey('plan'),
+              // controller: currentWPLC.cpCurPlan,
+              // onChanged: (yes) => ecController.checkOnChange(),
+              initialValue:
+                  'lkj \nasd \nlkj \nasdlkj \nasdlkj \nasdlkj \nasdlkj \nasdlkj \nasd \nasdlkj \nasd',
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 1.0),
+                  ),
+                  labelText: 'Plan',
+                  contentPadding: const EdgeInsets.all(4.0),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.save),
+                    onPressed: () {},
+                  )),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        ConstrainedBox(
+          constraints: new BoxConstraints(
+            maxHeight: 200,
+          ),
+          child: SingleChildScrollView(
+            reverse: true,
+            child: TextFormField(
+              // focusNode: focusNode,
+              // controller: controller,
+              // onEditingComplete: onEditingComplete,
+              key: ValueKey('entry'),
+              onChanged: (yes) {
+                ecController.checkOnChange();
+              },
+              validator: (val) {
+                if (val!.trim().isEmpty) {
+                  return 'Review/Entry cannot be empty!';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                  labelText: 'Review / Entry',
+                  contentPadding: const EdgeInsets.all(4.0),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.save),
+                    onPressed: () {},
+                  )),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+            ),
+          ),
+        ),
+        Container(
+          height: 55,
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: Scrollbar(
+              scrollbarOrientation: ScrollbarOrientation.bottom,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.only(top: 7, left: 5, right: 5, bottom: 4),
+                      width: 120,
+                      child: TextFormField(
+                        key: ValueKey('date'),
+                        // controller: dobCont,
+                        // validator:
+                        //     RequiredValidator(errorText: 'Date is required'),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Date',
+                          suffixIcon: IconButton(
+                              icon: Icon(Icons.calendar_today),
+                              onPressed: () {} //_selectDate(context),
                               ),
-                            if (snapshot.data!.isNotEmpty)
-                              ConstrainedBox(
-                                  constraints: BoxConstraints(maxHeight: 300),
-                                  child: GridView(
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount:
-                                          ResponsiveWidget.isSmallScreen(
-                                                  context)
-                                              ? 2
-                                              : 3,
-                                    ),
-                                    children: <Widget>[...?snapshot.data],
-                                  )
-                                  // ListView(
-                                  //   shrinkWrap: true,
-                                  //   padding: const EdgeInsets.symmetric(
-                                  //       horizontal: 10),
-                                  //   children: <Widget>[...?snapshot.data],
-                                  // ),
-                                  )
-                          ],
+                          border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 1.0),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ));
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        });
+                    Container(
+                        padding: EdgeInsets.only(
+                            top: 7, left: 5, right: 5, bottom: 4),
+                        width: 120,
+                        child: TextFormField(
+                          key: ValueKey('time'),
+                          // controller: timeCont,
+                          // validator:
+                          //     RequiredValidator(errorText: 'Time is required'),
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: 'Time',
+                            suffixIcon: IconButton(
+                                icon: Icon(Icons.access_time),
+                                onPressed: () {} // => _selectTime(context),
+                                ),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 1.0),
+                            ),
+                          ),
+                        )),
+                    // ...vsList
+                  ],
+                ),
+                // ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

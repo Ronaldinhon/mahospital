@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,12 +11,13 @@ import 'package:mahospital/models/local_user.dart';
 import 'package:mahospital/models/user.dart';
 import 'package:mahospital/widget/leading_drawer.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 
 import 'package:mahospital/cameras/qr_view.dart';
-
-// import '../qr_view.dart';
+import 'package:number_display/number_display.dart';
+// import "package:unorm_dart/unorm_dart.dart" as unorm;
+// import 'package:normalizer/normalizer.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -40,6 +40,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late HandSignaturePainterView ww;
   final GlobalKey globalKey = new GlobalKey();
   final TextEditingController chop = TextEditingController();
+  final display = createDisplay(
+    length: 5,
+    // decimal: 2,
+  );
+  var combining = RegExp(r"[^\\x00-\\x7F]/g");
 
   // .withConverter<LocalUser>(
   //   fromFirestore: (snapshot, _) => LocalUser.fromJson(snapshot.data()!),
@@ -56,6 +61,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       maxWidth: 10.0,
       type: SignatureDrawType.shape,
     );
+    // print(display(17400.9098)); // 17400 = 17k
+    // print(display(0.0990098)); // 0
+    // print(unorm.nfd("öäü"));
+    // print(unorm.nfc("öäü"));
+    // print(unorm.nfkd("öäü").replaceAll(combining, ""));
+    // print(unorm.nfkc("öäü"));
+    // print("öäüẬ".normalize()); // ooua
     super.initState();
   }
 
@@ -87,6 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // if (FirebaseAuth.instance.currentUser == null) {
     // Navigator.of(context).pushReplacementNamed('/login');
     // } else {
+
+    /* String text = await FlutterTesseractOcr.extractHocr(
+      'assets/images/mo_truth.png',
+      language: 'eng',
+    ); 
+    print(text); 
+    why suddenly cannot
+    */
     user = auth.currentUser!;
     uid = user.uid;
     if (!authController.inited) {
@@ -183,10 +203,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            CircleAvatar(
-                                radius: 60,
-                                backgroundColor: Color(0xffdadada),
-                                backgroundImage: NetworkImage(u.imageUrl)),
+                            GestureDetector(
+                              onTap: () => print('Heyya'),
+                              child: CircleAvatar(
+                                  radius: 60,
+                                  backgroundColor: Color(0xffdadada),
+                                  backgroundImage: NetworkImage(u.imageUrl)),
+                            ),
                             SizedBox(
                               height: 15,
                             ),
@@ -194,6 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text("(${u.shortName})"),
                             // Image.network(
                             //     'https://w7.pngwing.com/pngs/285/139/png-transparent-elephant-animal-africa-transparent-background-white-background.png'),
+                            // Image.asset('assets/images/mo_truth.png'),
                             SizedBox(
                               height: 10,
                             ),
@@ -307,66 +331,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             SizedBox(
                               height: 10,
                             ),
-                            Container(
-                                constraints: BoxConstraints(
-                                    minHeight: 200, minWidth: 200),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                  color: Colors.black,
-                                  width: 1,
-                                )),
-                                // color: Colors.white,
-                                child: ww),
-                            SizedBox(
-                              height: 4,
-                            ),
-                            ElevatedButton(
-                                child: Icon(Icons.save),
-                                onPressed: () async => ecController.bb =
-                                    await control.toImage(
-                                        background: Colors.white)),
-                            ElevatedButton(
-                                child: Icon(Icons.delete),
-                                onPressed: () => control.clear()),
-                            SizedBox(
-                              height: 8,
-                            ),
-                            SizedBox(
-                              width: 200,
-                              child: TextFormField(
-                                style: TextStyle(fontSize: 10),
-                                controller: chop,
-                                keyboardType: TextInputType.multiline,
-                                maxLines: null,
-                                decoration: InputDecoration(
-                                  labelText: 'Chop',
-                                  suffixIcon: IconButton(
-                                    icon: Icon(Icons.save),
-                                    onPressed: () => setState(() {}),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            RepaintBoundary(
-                              key: globalKey,
-                              child: Container(
-                                constraints: BoxConstraints(maxWidth: 250),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.black, width: 2),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  chop.text,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
-                                ),
-                              ),
-                            ),
-                            ElevatedButton(
-                                child: Icon(Icons.save),
-                                onPressed: () => _captureAndSharePng()),
+
+                            // created sign widget
+                            // Container(
+                            //     constraints: BoxConstraints(
+                            //         minHeight: 200, minWidth: 200),
+                            //     decoration: BoxDecoration(
+                            //         border: Border.all(
+                            //       color: Colors.black,
+                            //       width: 1,
+                            //     )),
+                            //     // color: Colors.white,
+                            //     child: ww),
+                            // SizedBox(
+                            //   height: 4,
+                            // ),
+                            // ElevatedButton(
+                            //     child: Icon(Icons.save),
+                            //     onPressed: () async => ecController.bb =
+                            //         await control.toImage(
+                            //             background: Colors.white)),
+                            // ElevatedButton(
+                            //     child: Icon(Icons.delete),
+                            //     onPressed: () => control.clear()),
+                            // SizedBox(
+                            //   height: 8,
+                            // ),
+                            // SizedBox(
+                            //   width: 200,
+                            //   child: TextFormField(
+                            //     style: TextStyle(fontSize: 10),
+                            //     controller: chop,
+                            //     keyboardType: TextInputType.multiline,
+                            //     maxLines: null,
+                            //     decoration: InputDecoration(
+                            //       labelText: 'Chop',
+                            //       suffixIcon: IconButton(
+                            //         icon: Icon(Icons.save),
+                            //         onPressed: () => setState(() {}),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
+                            // SizedBox(height: 4),
+                            // RepaintBoundary(
+                            //   key: globalKey,
+                            //   child: Container(
+                            //     constraints: BoxConstraints(maxWidth: 250),
+                            //     decoration: BoxDecoration(
+                            //       color: Colors.white,
+                            //       border:
+                            //           Border.all(color: Colors.black, width: 2),
+                            //     ),
+                            //     alignment: Alignment.center,
+                            //     child: Text(
+                            //       chop.text,
+                            //       textAlign: TextAlign.center,
+                            //       style: TextStyle(
+                            //           fontSize: 12,
+                            //           fontWeight: FontWeight.w900),
+                            //     ),
+                            //   ),
+                            // ),
+                            // ElevatedButton(
+                            //     child: Icon(Icons.save),
+                            //     onPressed: () => _captureAndSharePng()),
                           ],
                         ),
                       ),

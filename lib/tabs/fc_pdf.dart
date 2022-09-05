@@ -33,58 +33,61 @@ class FcPdfState extends State<FcPdf> {
   String holder = '';
   Iterable<List> headerDatesInt = [];
   Map modifiedIterable = {};
+  late int separateParam;
 
   List<String> bloodParam = [
     'Hb',
     'Hct',
-    'MCV',
-    'MCH',
     'Plt',
     'Twc',
-    'PMN',
-    'Lymph',
-    'Eos',
-    'Mono',
-    'Urea',
-    'Creat',
     'Na',
     'K',
     'Cl',
+    'Urea',
+    'Creat',
     'Ca',
     'Phos',
     'Mg',
-    'TBil',
-    'Dir',
-    'Indir',
-    'Pro',
+    'TProt',
     'Alb',
     'Glob',
+    'TBil',
     'ALT',
     'ALP',
     'CK',
     'AST',
     'LDH',
-    'PT',
-    'APTT',
-    'INR',
-    'ESR',
-    'CRP',
-    'T4',
-    'TSH',
-    'ferri',
-    'iron',
-    'UIBC',
-    'TIBC',
-    'Tr.Sat',
   ];
+    // 'MCV',
+    // 'MCH',
+    // 'PMN',
+    // 'Lymph',
+    // 'Eos',
+    // 'Mono',
+    // 'Dir',
+    // 'Indir',
+    // 'PT',
+    // 'APTT',
+    // 'INR',
+    // 'ESR',
+    // 'CRP',
+    // 'T4',
+    // 'TSH',
+    // 'ferri',
+    // 'iron',
+    // 'UIBC',
+    // 'TIBC',
+    // 'Tr.Sat',
+  late List<int> separateParamNum;
 
   @override
   void initState() {
     // createDoc();
-    super.initState();
+    separateParam = (bloodParam.length / 16).ceil();
     // sample..addAll(currentWPLC.currentBML);
     if (ecController.numberOfDays != 0) {
       headerDatesInt = partition(ecController.orderedDateTime, 11);
+      // 11 needs to change since i messed with container width
       ecController.masterMap.forEach((k, v) {
         modifiedIterable[k] = partition(v, 11);
       });
@@ -94,6 +97,7 @@ class FcPdfState extends State<FcPdf> {
       addPdfPgFunc(pop);
     }
     callAsyncFunc();
+    super.initState();
   }
 
   void callAsyncFunc() async {
@@ -123,7 +127,7 @@ class FcPdfState extends State<FcPdf> {
   List<pw.Widget> _getTitleWidget(int ii) {
     List<pw.Container> header = [];
     header.add(pw.Container(
-      width: 40,
+      width: 80,
       height: 40,
       decoration: pw.BoxDecoration(
           border: pw.Border.all(
@@ -138,7 +142,7 @@ class FcPdfState extends State<FcPdf> {
         var timi = DateTime.fromMillisecondsSinceEpoch(tim);
         header.add(pw.Container(
             padding: pw.EdgeInsets.only(left: 2, top: 2),
-            width: 40,
+            width: 50,
             height: 40,
             decoration: pw.BoxDecoration(
                 border: pw.Border.all(
@@ -157,17 +161,26 @@ class FcPdfState extends State<FcPdf> {
     return header;
   }
 
-  List<pw.Widget> buildLines(int ii) {
+  List<pw.Widget> buildLines(int ii, int pp) {
     List<pw.Widget> lines = [];
-    for (String bp in ecController.bloodParam) {
+    var last = (pp * 16) + 15;
+    for (String bp in bloodParam.sublist(
+        pp * 16, last >= bloodParam.length ? bloodParam.length : last)) {
       List<pw.Widget> innerLines = [];
       innerLines.add(pw.Container(
-        child: pw.Center(
-            child: pw.Text(bp,
-                overflow: pw.TextOverflow.clip,
-                style: pw.TextStyle(fontSize: 9))),
-        width: 40,
-        height: 16,
+        child: pw.Column(
+            mainAxisAlignment: pw.MainAxisAlignment.center,
+            mainAxisSize: pw.MainAxisSize.max,
+            children: [
+              pw.Text(bp,
+                  overflow: pw.TextOverflow.clip,
+                  style: pw.TextStyle(fontSize: 9)),
+              pw.Text('3.2-5.2 mmol/L',
+                  overflow: pw.TextOverflow.clip,
+                  style: pw.TextStyle(fontSize: 9)),
+            ]),
+        width: 80,
+        height: 40, // was 30 appropriately, just trying to separate pages
         decoration: pw.BoxDecoration(
             border: pw.Border.all(
           color: PdfColors.black,
@@ -181,8 +194,8 @@ class FcPdfState extends State<FcPdf> {
               child: pw.Text(lulu,
                   overflow: pw.TextOverflow.clip,
                   style: pw.TextStyle(fontSize: 9))),
-          width: 40,
-          height: 16,
+          width: 50,
+          height: 40, // was 30 appropriately, just trying to separate pages
           decoration: pw.BoxDecoration(
               border: pw.Border.all(
             color: PdfColors.red,
@@ -218,29 +231,35 @@ class FcPdfState extends State<FcPdf> {
   }
 
   void addPdfPgFunc(int i) {
-    pdf.addPage(pw.Page(
-        pageFormat: pf.PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                pw.Header(
-                    level: 0,
-                    child: pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: <pw.Widget>[
-                          pw.Text('Name: Ali  Ic: 123456', textScaleFactor: 1),
-                          pw.Text('Page ${i + 1}')
-                          // pw.PdfLogo()
-                        ])),
-                // makeHeader(),
-                pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.start,
-                    mainAxisSize: pw.MainAxisSize.min,
-                    children: _getTitleWidget(i)),
-                ...buildLines(i)
-              ]);
-        }));
+    // var newParam = separateParam;
+    for (int paramPage in List.generate(separateParam, (pp) => pp)) {
+      // already minus 1 in list generation
+      pdf.addPage(pw.Page(
+          pageFormat: pf.PdfPageFormat.a4,
+          build: (pw.Context context) {
+            return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: <pw.Widget>[
+                  pw.Header(
+                      level: 0,
+                      child: pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: <pw.Widget>[
+                            pw.Text('Name: Ali  Ic: 123456',
+                                textScaleFactor: 1),
+                            pw.Text('Page ${i + 1}')
+                            // pw.PdfLogo()
+                          ])),
+                  // makeHeader(),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.start,
+                      mainAxisSize: pw.MainAxisSize.min,
+                      children: _getTitleWidget(i)),
+                  ...buildLines(i, paramPage)
+                ]);
+          }));
+    }
+
     // print('i=' + i.toString());
     // print('l=' + headerDatesInt.length.toString());
     // if (i < headerDatesInt.length) addPdfPgFunc(++i);

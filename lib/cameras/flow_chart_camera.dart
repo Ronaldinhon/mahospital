@@ -42,7 +42,7 @@ class FlowChartCameraState extends State<FlowChartCamera> {
     'ALT',
     'AST',
     'ALP',
-    'Calcium - Corre...',
+    'Calcium - Corre',
     'Phosphate',
     'Magnesium',
     'Creatine Kinase',
@@ -69,7 +69,7 @@ class FlowChartCameraState extends State<FlowChartCamera> {
     'ALT': 'ALT',
     'AST': 'AST',
     'ALP': 'ALP',
-    'Calcium - Corre...': 'Ca', // watchout
+    'Calcium - Corre': 'Ca', // watchout
     'Phosphate': 'Phos',
     'Magnesium': 'Mg',
     'Creatine Kinase': 'CK',

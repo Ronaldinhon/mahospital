@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mahospital/controllers/entry_chart_controller.dart';
 import 'package:mahospital/screen/404/error.dart';
+import 'package:mahospital/screen/sign_chop.dart';
 import 'constants/controllers.dart';
 import 'constants/firebase.dart';
 import 'controllers/auth_controller.dart';
@@ -96,6 +97,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           page: () => LoginScreen(),
         ),
         GetPage(name: asHospPageRoute, page: () => AsHospScreen()),
+        GetPage(name: signChopRoute, page: () => SignChop()),
       ],
       debugShowCheckedModeBanner: false,
       title: 'MaHospital',

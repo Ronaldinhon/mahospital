@@ -1,11 +1,14 @@
-// import 'dart:io';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/controllers/auth_controller.dart';
 import 'package:mahospital/screen/reset_pw_screen.dart';
@@ -33,7 +36,16 @@ class _LoginScreenState extends State<LoginScreen> {
     if (authController.remindCompleteRegistration)
       Future.delayed(
           const Duration(milliseconds: 1500), () => remindSnackbar());
+    // ocrTest();
     super.initState();
+  }
+
+  ocrTest() async {
+    String text = await FlutterTesseractOcr.extractHocr(
+      'assets/images/mo_truth.png',
+      language: 'eng',
+    );
+    print(text);
   }
 
   void remindSnackbar() {
@@ -80,6 +92,11 @@ class _LoginScreenState extends State<LoginScreen> {
   // }
 
   final focus = FocusNode();
+  bool _scanning = false;
+  String _extractText = '';
+  File _pickedIma = File('');
+  late XFile? pickedImage;
+  final picker = ImagePicker();
 
   // final HttpsCallable checkAddMember = FirebaseFunctions.instance.httpsCallable(
   //   'checkAddMember',
@@ -103,6 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  // child: ListView(
                   children: <Widget>[
                     TextFormField(
                       autofocus: true,
@@ -180,6 +198,85 @@ class _LoginScreenState extends State<LoginScreen> {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () => Get.to(ResetPWScreen()),
                       child: Text('Reset Password'),
+                    ),
+
+                    _pickedIma.path.isEmpty
+                        ? Container(
+                            height: 100,
+                            color: Colors.grey[300],
+                            child: Icon(
+                              Icons.image,
+                              size: 100,
+                            ),
+                          )
+                        : Container(
+                            height: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                image: DecorationImage(
+                                  image: NetworkImage(_pickedIma
+                                      .path), // changed to network image because kisweb
+                                  fit: BoxFit.fill,
+                                )),
+                          ),
+                    Container(
+                      height: 50,
+                      margin:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      // child: RaisedButton(
+                      //   color: Colors.green,
+                      //   child: Text(
+                      //     'Pick Image with text',
+                      //     style: TextStyle(
+                      //       color: Colors.white,
+                      //     ),
+                      //   ),
+                      //   onPressed: () async {
+                      //     setState(() {
+                      //       _scanning = true;
+                      //     });
+                      //     pickedImage = (await picker.pickImage(
+                      //         source: ImageSource.gallery));
+                      //     _pickedIma = File(pickedImage!.path);
+                      //     _extractText = await FlutterTesseractOcr.extractText(
+                      //         _pickedIma.path,
+                      //         language: 'eng',
+                      //         args: {
+                      //           "preserve_interword_spaces": "1",
+                      //         });
+
+                      //     var ss = await FlutterTesseractOcr.extractHocr(
+                      //         _pickedIma.path,
+                      //         language: 'eng',
+                      //         args: {
+                      //           "preserve_interword_spaces": "1",
+                      //         });
+                      //     List<String> vv = LineSplitter.split(ss).toList();
+                      //     print(vv);
+                      //     setState(() {
+                      //       _scanning = false;
+                      //     });
+                      //   },
+                      // ),
+                    ),
+                    SizedBox(height: 20),
+                    _scanning
+                        ? Center(child: CircularProgressIndicator())
+                        : Icon(
+                            Icons.done,
+                            size: 40,
+                            color: Colors.green,
+                          ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: Text(
+                        _extractText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     )
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart' as intl;
-import 'dart:convert';
+// import 'dart:convert';
 import 'dart:developer' as dev;
 import 'package:image/image.dart' as img;
 
@@ -21,7 +22,7 @@ class IntNote extends StatefulWidget {
 }
 
 class _IntNoteState extends State<IntNote> {
-  late File pdfFile;
+  // late File pdfFile;
   late nat.PdfController pdfController;
   bool initDownload = false;
   final pdf = pw.Document();
@@ -531,6 +532,9 @@ class _IntNoteState extends State<IntNote> {
               ); // Center
             }),
         index: ind);
+
+    // base64.encode(await pdf.save());
+
     // if (lisi.length > 0 || sample2.isNotEmpty || count.isEven) {
     //   count += 1;
     //   // Future.delayed(const Duration(seconds: 2), () =>

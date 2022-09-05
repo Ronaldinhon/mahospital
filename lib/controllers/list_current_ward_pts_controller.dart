@@ -44,6 +44,8 @@ class CurrentWardPtsListController extends GetxController {
 
   late pw.PageTheme theme;
 
+  Map<String, dynamic> initialMap = {};
+
   Future<void> savePtSum() async {
     updatingPtSum.value = true;
     await wardPtRef.doc(cwpm.value.id).update({

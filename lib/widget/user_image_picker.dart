@@ -90,7 +90,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
                     width: 28,
                   )
                 : Container(),
-            isWebMobile
+            isWebMobile // why only webMobile?
                 ? IconButton(
                     onPressed: _takePicture,
                     icon: Icon(

@@ -9,6 +9,7 @@ import 'package:mahospital/constants/firebase.dart';
 import 'package:intl/intl.dart';
 
 import '../cameras/flow_chart_camera.dart';
+import '../helpers/reponsiveness.dart';
 
 class FcEntry extends StatefulWidget {
   @override
@@ -103,6 +104,17 @@ class _FcEntryState extends State<FcEntry> {
   Map<String, dynamic> initialMap = {};
   // i think just make it into a Map
   bool loading = false;
+  final bloodList = [
+    'Hb',
+    'Twc',
+    'Hct',
+    'Plt',
+    'Na',
+    'K',
+    'Cl',
+    'Urea',
+    'Creat'
+  ];
 
   _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -146,20 +158,26 @@ class _FcEntryState extends State<FcEntry> {
       child: Form(
         key: _formKey,
         child: Container(
-          // height: 333,
-          // constraints: BoxConstraints(
-          //     maxHeight: MediaQuery.of(context).size.height * 0.65),
-          child:
-              //try first lah
-              SingleChildScrollView(
+          child: SingleChildScrollView(
             padding: EdgeInsets.all(5),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(ecController.editFcEntry.value
-                    ? 'Edit Results'
-                    : 'Add Results'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ElevatedButton(
+                      child: Text('<- Back'),
+                      onPressed: () => ecController.entryFC.value = false,
+                    ),
+                  ],
+                ),
+                Text(
+                  ecController.editFcEntry.value
+                      ? 'Edit Results'
+                      : 'Add Results',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 TextFormField(
                   key: ValueKey('date'),
                   controller: dobCont,
@@ -204,107 +222,44 @@ class _FcEntryState extends State<FcEntry> {
                 SizedBox(
                   height: 8,
                 ),
-                // the way to go is make a separate stateless widget with a testeditingcontroller inside
-                // we need 40 of those - with params name string
+                /* the way to go is make a separate stateless widget with a texteditingcontroller inside
+                we need 40 of those - with params name string
+                i think 40 texteditingcontroller is too much... 
+                separate stateless widget, call on save here can???? 
+                - we'll try should be fine. yeahhh - with master map in GetController, 
+                 upon change pt need to empty it */
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text('Fill in / Overrride camera results',
+                        style: TextStyle(fontSize: 8))
+                  ],
+                ),
                 SizedBox(
-                  width: 200,
+                  width: MediaQuery.of(context).size.width * 0.85,
                   height: 300,
                   child: Scrollbar(
-                      child: ListView(
-                    children: [
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Hb',
-                        ),
-                        maxLength: 30,
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Hb'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Twc',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Twc'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Hct',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Hct'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Plt',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Plt'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Na',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Na'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'K',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['K'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Cl',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Cl'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Urea',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Urea'] = val);
-                        },
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Creat',
-                        ),
-                        onSaved: (val) {
-                          if (val != null)
-                            setState(() => initialMap['Creat'] = val);
-                        },
-                      ),
-                    ],
-                  )),
+                      child: GridView.count(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          //   crossAxisCount:
+                          //       ResponsiveWidget.isSmallScreen(context) ? 2 : 3,
+                          // ),
+                          children: bloodParam
+                              .map((paramName) =>
+                                  BpTextField(paramName, initialMap))
+                              .toList()
+                          //   TextFormField(
+                          //     scrollPadding: EdgeInsets.all(5),
+                          //     keyboardType: TextInputType.number,
+                          //     textInputAction: TextInputAction.next,
+                          //     decoration: InputDecoration(
+                          //       labelText: 'Hb',
+                          //     ),
+
+                          )),
                 ),
                 SizedBox(
                   height: 8,
@@ -314,8 +269,10 @@ class _FcEntryState extends State<FcEntry> {
                         child: Text('Save'),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            setState(() => loading = true);
+                            // setState(() => loading = true);
                             _formKey.currentState!.save();
+                            print(initialMap);
+                            // do i need to setstate onSave ???
                             DocumentSnapshot fcss = await fc.get();
                             String dateInUTC = DateTime(
                                     selectedDate.year,
@@ -345,12 +302,33 @@ class _FcEntryState extends State<FcEntry> {
                             }
                           }
                         })
-                    : CircularProgressIndicator()
+                    : CircularProgressIndicator(),
               ],
             ),
           ),
         ),
       ),
     ));
+  }
+}
+
+class BpTextField extends StatelessWidget {
+  final String paramName;
+  final Map iniMap;
+
+  BpTextField(this.paramName, this.iniMap);
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      scrollPadding: EdgeInsets.all(5),
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+      decoration: InputDecoration(
+        labelText: paramName,
+      ),
+      onSaved: (val) {
+        if (val != null) iniMap[paramName] = val;
+      },
+    );
   }
 }

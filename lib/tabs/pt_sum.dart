@@ -44,7 +44,7 @@ class _PtSumState extends State<PtSum> {
                     maxHeight: 160,
                   ),
                   child: SingleChildScrollView(
-                    reverse: true,
+                    reverse: false,
                     child: TextFormField(
                       controller: currentWPLC.cpCurDiag,
                       key: ValueKey('diagnosis'),
@@ -66,7 +66,7 @@ class _PtSumState extends State<PtSum> {
                     maxHeight: 160,
                   ),
                   child: SingleChildScrollView(
-                    reverse: true,
+                    reverse: false,
                     child: TextFormField(
                       controller: currentWPLC.cpCurPlan,
                       key: ValueKey('plan'),

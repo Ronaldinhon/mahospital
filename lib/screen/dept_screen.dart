@@ -176,7 +176,7 @@ class _DeptScreenState extends State<DeptScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var platform = Theme.of(context).platform;
+    // var platform = Theme.of(context).platform;
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -352,7 +352,14 @@ class _DeptScreenState extends State<DeptScreen> {
                       else
                         Text('Request for Department Membership to view Wards'),
                       SizedBox(
-                        height: 10,
+                        height: 5,
+                      ),
+                      Divider(
+                        color: Colors.purple,
+                        thickness: 3,
+                      ),
+                      SizedBox(
+                        height: 5,
                       ),
                       FutureBuilder(
                         future: iniMembers(),
@@ -363,9 +370,10 @@ class _DeptScreenState extends State<DeptScreen> {
                             return Theme(
                                 data: Theme.of(context).copyWith(
                                     dividerTheme: DividerThemeData(
-                                        color: Colors.purple, thickness: 3.5)),
+                                        color: Colors.transparent,
+                                        thickness: 3.5)),
                                 child: ExpansionTile(
-                                  title: Text('Members'),
+                                  title: Text('leijin'),
                                   subtitle: Text(dmmm.length.toString()),
                                   children: dmmm.length > 0
                                       ? dmmm

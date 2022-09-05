@@ -1,12 +1,10 @@
-import 'dart:ffi';
+// import 'dart:ffi';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:get/get.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:mahospital/constants/controllers.dart';
-import 'package:mahospital/constants/firebase.dart';
 import 'package:intl/intl.dart';
 
 class VsTable extends StatefulWidget {
@@ -15,7 +13,9 @@ class VsTable extends StatefulWidget {
 }
 
 class _VsTableState extends State<VsTable> {
-  List<String> vitalsTitle = ['HR', 'BP', 'RR', 'O2', 'Temp', 'Notes'];
+  List<String> vitalsTitle = [
+    'HR/min', 'SYS/mmHg', 'DIA/mmHg', 'RR/min', 'SpO2', 'Temp', //'Notes'
+  ];
   List<String> vitals = [
     '200/80',
     '200',
@@ -26,66 +26,8 @@ class _VsTableState extends State<VsTable> {
   ];
   List<String> date = [
     '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
-    '11/11/2021',
   ];
   List<String> time = [
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
-    '18:18H',
     '18:18H',
   ];
 
@@ -93,13 +35,65 @@ class _VsTableState extends State<VsTable> {
   int initialRows = 8;
   double offset = 0;
   List<Team> ff = [];
+  Map sendDataMap = {};
+  late DateTime selectedDate;
+  late TimeOfDay selectedTime;
+  final dobCont = TextEditingController();
+  final timeCont = TextEditingController();
+
+  void saveData() {}
 
   @override
   void initState() {
     sctrl = ScrollController(keepScrollOffset: true);
     sctrl.addListener(slistener);
     ff = teamsData;
+    vitalsTitle.asMap().forEach((i, v) => vsList.add(
+        VsTextField(v, sendDataMap, saveData)));
+    selectedDate = DateTime.now();
+    selectedTime = TimeOfDay.now();
+    dobCont.text = DateFormat('dd/MM/yyyy').format(selectedDate);
+    print(dobCont.text);
+    print(DateFormat.Hms().format(selectedDate));
+    timeCont.text = DateFormat.jm().format(selectedDate); 
+    // selectedTime.hour.toString() + ':' + selectedTime.minute.toString(); // get hour and minute and put into date time
     super.initState();
+  }
+
+  _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate, // Refer step 1
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null)
+      setState(() {
+        selectedDate = picked;
+        // print(DateFormat('dd/MM/yyyy').format(picked));
+        dobCont.text = DateFormat('dd-MM-yyyy').format(picked);
+      });
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? pickedS = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedS != null && pickedS != selectedTime)
+      setState(() {
+        selectedTime = pickedS;
+        // print(pickedS.format(context));
+        timeCont.text = pickedS.format(context);
+        // pickedS.hour.toString() + ':' + pickedS.minute.toString();
+      });
   }
 
   void slistener() {
@@ -119,116 +113,6 @@ class _VsTableState extends State<VsTable> {
     super.dispose();
   }
 
-  Widget _getTitleItemWidget(String vitalString) {
-    return Container(
-      height: 90,
-      width: vitalString == 'Notes'
-          ? 260
-          : vitalString == 'O2'
-              ? 100
-              : 60,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1,
-        ),
-      ),
-      child: Center(
-        child: Text(vitalString),
-      ),
-    );
-  }
-
-  List<Widget> _getTitleWidget() {
-    List<Widget> sth = [];
-    sth.add(Container(
-      padding: EdgeInsets.all(5),
-      height: 90,
-      width: 90,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1,
-        ),
-      ),
-      // padding: EdgeInsets.all(3),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          ElevatedButton(
-            child: Icon(
-              Icons.print,
-              color: Colors.black,
-            ),
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
-            onPressed: () => ecController.printingFC.value = true,
-          ),
-          ElevatedButton(
-            child: Icon(
-              Icons.arrow_drop_down,
-              color: Colors.black,
-            ),
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
-            onPressed: () => ecController.editFCparam.value = true,
-          )
-        ],
-      ),
-    ));
-    vitalsTitle.forEach((dt) {
-      sth.add(_getTitleItemWidget(dt));
-    });
-    return sth;
-  }
-
-  Widget _generateFirstColumn(BuildContext context, int index) {
-    return Material(
-      child: Container(
-          padding: EdgeInsets.all(3),
-          width: 90,
-          height: 80,
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: 1,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              InkWell(
-                splashColor: Colors.red,
-                onTap: () => addVsValue(time[index], index),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(date[index]),
-                    Text(time[index]),
-                  ],
-                ),
-              ),
-              // IconButton(
-              //     icon: Icon(Icons.edit, color: Colors.black, size: 18),
-              //     onPressed: () => print('edit'),
-              //     visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
-              ElevatedButton(
-                child: Icon(Icons.edit, color: Colors.black, size: 18),
-                style: ButtonStyle(
-                    padding: MaterialStateProperty.all(
-                      EdgeInsets.all(0),
-                    ),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue),
-                    visualDensity: VisualDensity(horizontal: -4, vertical: -4)),
-                onPressed: () => print('edit'),
-              ),
-            ],
-          )),
-    );
-  }
-
   void addVsValue(String head, int index) {
     // List<String> ixVals = [];
     // for (var ii in ecController.ascNum) {
@@ -238,69 +122,6 @@ class _VsTableState extends State<VsTable> {
     String oyster = '\n$head ' + vitals.join(" // ");
     ecController.mainEditor.text += oyster;
   }
-
-  Widget _generateRightHandSideRow(BuildContext context, int index) {
-    List<Widget> rowChildren = [];
-    var count = 0;
-    for (var ii in vitals) {
-      count++;
-      rowChildren.add(Container(
-        padding: EdgeInsets.all(5),
-        child: Text(ii),
-        width: count == 6
-            ? 260
-            : count == 5
-                ? 100
-                : 60,
-        height: 80,
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 1,
-          ),
-        ),
-        alignment: Alignment.center,
-      ));
-    }
-    return Row(
-      children: rowChildren,
-    );
-  }
-
-  late DocumentReference fc;
-  Future<List> getFlowChartData(String id) async {
-    // bloodParam.forEach((bp) => ecController.masterMap[bp] = []);
-    // fc = wardPtRef.doc(id).collection('flowCharts').doc('1');
-    // DocumentSnapshot fcSS = await fc.get();
-    // if (fcSS.exists) {
-    //   Map bloodMap = fcSS.get('bloods');
-    //   ecController.orderedDateTime = bloodMap.keys.toList();
-    //   ecController.numberOfDays = ecController.orderedDateTime.length;
-    //   ecController.ascNum = List.generate(ecController.numberOfDays, (i) => i);
-    //   ecController.orderedDateTime.sort((a, b) => int.parse(b)
-    //       .compareTo(int.parse(a))); // reversed - actually no need int.parse
-    //   for (var odt in ecController.orderedDateTime) {
-    //     Map bloodValues = bloodMap[odt];
-    //     bloodParam.forEach((bp) {
-    //       ecController.masterMap[bp]!.add(bloodValues[bp]);
-    //     });
-    //   }
-    //   List<List<String>> masterList = [];
-    //   for (var bpp in bloodParam) {
-    //     masterList.add(ecController.masterMap[bpp]!);
-    //   }
-    //   ecController.wer = masterList;
-    //   return masterList;
-    // } else {
-    //   List<List<String>> emptyList = [];
-    //   bloodParam.forEach((bp) => emptyList.add(['']));
-    //   ecController.wer = emptyList;
-    //   ecController.numberOfDays = 0;
-    //   return [];
-    // }
-    return [];
-  }
-
-  HDTRefreshController _hdtRefreshController = HDTRefreshController();
 
   List<Team> teamsData = [
     Team(
@@ -525,16 +346,16 @@ class _VsTableState extends State<VsTable> {
             columns: [
               DataColumn(
                   label: SizedBox(
-                      width: 60, child: Center(child: Text('Points')))),
-              DataColumn(label: Text('Won')),
-              DataColumn(label: Text('Lost')),
-              DataColumn(label: Text('Drawn')),
+                      width: 60, child: Center(child: Text('HR')))),
+              DataColumn(label: Text('RR')),
+              DataColumn(label: Text('SpO2')),
+              DataColumn(label: Text('Temp')),
               DataColumn(
                   label: SizedBox(
-                      width: 110, child: Center(child: Text('Against')))),
+                      width: 110, child: Center(child: Text('BP')))),
               DataColumn(
                   label:
-                      SizedBox(width: 260, child: Center(child: Text('GD')))),
+                      SizedBox(width: 260, child: Center(child: Text('Notes')))),
             ],
             rows: [
               ...ff.map((team) => DataRow(
@@ -594,8 +415,8 @@ class _VsTableState extends State<VsTable> {
                   padding: const EdgeInsets.only(top: 3.0),
                   child: Column(
                     children: [
-                      Text(date[1]),
-                      Text(time[1]),
+                      Text(date[0]),
+                      Text(time[0]),
                       ElevatedButton(
                         child: Icon(Icons.edit, color: Colors.black, size: 18),
                         style: ButtonStyle(
@@ -619,19 +440,114 @@ class _VsTableState extends State<VsTable> {
     );
   }
 
+  List<VsTextField> vsList = [];
+
   @override
   Widget build(BuildContext context) {
+    // return FutureBuilder(
+    //     future: buildList(),
+    //     builder: (BuildContext context, AsyncSnapshot<dynamic> snapShot) {
+    //       if (snapShot.connectionState == ConnectionState.done) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          height: 70,
+          height: 55,
+          width: MediaQuery.of(context).size.width,
           child: Padding(
             padding: const EdgeInsets.all(3.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [],
+            child: Scrollbar(
+              scrollbarOrientation: ScrollbarOrientation.bottom,
+              isAlwaysShown: true,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.only(top: 7, left: 5, right: 5, bottom: 4),
+                      width: 180,
+                      child: TextFormField(
+                        key: ValueKey('date'),
+                        controller: dobCont,
+                        readOnly: true,
+                        validator:
+                            RequiredValidator(errorText: 'Date is required'),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          // contentPadding:
+                          //     EdgeInsets.zero,
+                          labelText: 'Date',
+                          prefixIcon: IconButton(
+                            icon: Icon(Icons.calendar_today),
+                            onPressed: () => _selectDate(context),
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 1.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                        padding: EdgeInsets.only(
+                            top: 7, left: 5, right: 5, bottom: 4),
+                        width: 160,
+                        child: TextFormField(
+                          key: ValueKey('time'),
+                          controller: timeCont,
+                          readOnly: true,
+                          validator:
+                              RequiredValidator(errorText: 'Time is required'),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            // contentPadding:
+                                // EdgeInsets.zero,
+                            labelText: 'Time',
+                            prefixIcon: IconButton(
+                              icon: Icon(Icons.access_time),
+                              onPressed: () => _selectTime(context),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 1.0),
+                            ),
+                          ),
+                        )),
+                    ...vsList,
+                    Container(
+                      // constraints: BoxConstraints(maxWidth: 50), // why cant use ConstrainedBox ??
+                      padding:
+                          EdgeInsets.only(top: 7, left: 5, right: 5, bottom: 4),
+                      width: 200,
+                      child: TextFormField(
+                        maxLines: 1,
+                        // maxLength: 70, // can be way more ba
+                        // controller: controller,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding:
+                                EdgeInsets.fromLTRB(5.0, 1.0, 5.0, 1.0),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 1.0),
+                            ),
+                            labelText: 'Notes',
+                            prefixIcon: IconButton(
+                              icon: Icon(Icons.save),
+                              onPressed: () {},
+                            )),
+                        // onSaved: (val) {
+                        //   if (val != null) vsMap[paramName] = val;
+                        // },
+                        onChanged: (val) => print(val),
+                      ),
+                    )
+                  ],
+                ),
+                // ),
               ),
             ),
           ),
@@ -649,6 +565,12 @@ class _VsTableState extends State<VsTable> {
         )
       ],
     );
+    //   } else {
+    //     return Center(
+    //       child: CircularProgressIndicator(),
+    //     );
+    //   }
+    // });
   }
 }
 
@@ -674,6 +596,46 @@ class Team {
   final int lost;
   final int against;
   final int gd;
+}
+
+class VsTextField extends StatelessWidget {
+  final String paramName;
+  final Map vsMap;
+  final controller = TextEditingController();
+  final void Function() saveFn;
+
+  void clearValue() {
+    controller.clear();
+  }
+
+  VsTextField(this.paramName, this.vsMap, this.saveFn);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // constraints: BoxConstraints(maxWidth: 50), // why cant use ConstrainedBox ??
+      padding: EdgeInsets.only(top: 7, left: 5, right: 5, bottom: 4),
+      width: 130,
+      child: TextFormField(
+        maxLines: 1,
+        controller: controller,
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.next,
+        decoration: InputDecoration(
+          isDense: true,
+          // contentPadding: EdgeInsets.fromLTRB(5.0, 1.0, 5.0, 1.0),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black, width: 1.0),
+          ),
+          labelText: paramName,
+        ),
+        onSaved: (val) {
+          if (val != null) vsMap[paramName] = val;
+        },
+        onChanged: (val) => print(val),
+      ),
+    );
+  }
 }
 
 // String.fromCharCode(0x2B) +

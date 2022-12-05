@@ -48,7 +48,7 @@ dependencies:
   # permission_handler: ^7.1.0 #1323 baseflow.com
   # image_gallery_saver: ^1.6.9 #191 unknown
   # fluttertoast: ^8.0.6 #1057 karthikonnam.dev
-  horizontal_data_table: ^3.2.0 #146 unknown
+  horizontal_data_table: ^3.3.0 #146 unknown
   scrollable_positioned_list: ^0.2.3 #715 google.dev
   # english_words: ^4.0.0 #221 unknown
   pdf: ^3.4.2 #799 nfet.net
@@ -81,7 +81,7 @@ dependencies:
   image: ^3.1.0
   hand_signature: ^2.1.1
   flutter_tesseract_ocr: ^0.4.20 
-  flutter_masked_text: ^0.8.0
+  extended_masked_text: ^2.3.1
   # unorm_dart: ^0.2.0
   # normalizer: ^0.0.2+3
   # string_validator: ^0.3.0

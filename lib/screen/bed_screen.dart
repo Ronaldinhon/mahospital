@@ -33,7 +33,7 @@ import 'package:universal_html/html.dart' as html;
 
 import 'ward_screen.dart';
 import 'dart:math' as math;
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:extended_masked_text/extended_masked_text.dart';
 
 class BedScreen extends StatefulWidget {
   final BedModel bed;

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:hand_signature/signature.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mahospital/constants/controllers.dart';
@@ -11,6 +12,10 @@ import 'package:mahospital/models/user.dart';
 import 'package:mahospital/widget/leading_drawer.dart';
 import 'package:mahospital/widget/user_image_picker.dart';
 import 'package:number_display/number_display.dart';
+
+import '../helpers/fonts/center_bold.dart';
+import '../helpers/reponsiveness.dart';
+import 'test_sc_disc_note.dart';
 
 class SignChop extends StatefulWidget {
   @override
@@ -30,7 +35,7 @@ class _SignChopState extends State<SignChop> {
   late UserModel u;
   late Future<DocumentSnapshot> getUser;
 
-  late HandSignaturePainterView ww;
+  late HandSignature ww;
   final GlobalKey globalKey = new GlobalKey();
   final TextEditingController chop = TextEditingController();
   final display = createDisplay(
@@ -45,9 +50,9 @@ class _SignChopState extends State<SignChop> {
 
   @override
   void initState() {
-    ww = HandSignaturePainterView(
+    ww = HandSignature(
       control: control,
-      color: Colors.blueGrey,
+      color: Colors.black,
       width: 1.0,
       maxWidth: 10.0,
       type: SignatureDrawType.shape,
@@ -115,77 +120,133 @@ class _SignChopState extends State<SignChop> {
               key: _scaffoldKey,
               appBar: AppBar(
                 title: Text('Sign & Chop'),
-                leading: IconButton(
-                  icon: Icon(Icons.menu),
-                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                ),
-                actions: [
-                  IconButton(
-                    icon: Icon(Icons.logout),
-                    onPressed: () => authController.signOut(),
-                  )
-                ],
+                // leading: IconButton(
+                //   icon: Icon(Icons.menu),
+                //   onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                // ),
+                // actions: [
+                //   IconButton(
+                //     icon: Icon(Icons.logout),
+                //     onPressed: () => authController.signOut(),
+                //   )
+                // ],
               ),
-              drawer: LeadingDrawer('sign_chop'),
-              backgroundColor: Theme.of(context).primaryColor,
-              body: WillPopScope(
-                  onWillPop: onWillPop,
-                  child: Center(
-                    child: Card(
-                      margin: EdgeInsets.all(20),
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Text("${u.title} ${u.name}"),
-                            Text("MMC / LJM no: ${u.reg}"),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                                constraints: BoxConstraints(
-                                    minHeight: 200, minWidth: 200),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                  color: Colors.black,
-                                  width: 1,
-                                )),
-                                child: ww),
-                            SizedBox(
-                              height: 4,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                // put a small circular avatar with sign image as the background
-                                // click and show the sign like a xray picture
-                                ElevatedButton(
-                                    child: Icon(Icons.save),
-                                    onPressed: () async => ecController.bb =
-                                        await control.toImage(
-                                            background: Colors.white)),
-                                ElevatedButton(
-                                    child: Icon(Icons.delete),
-                                    onPressed: () => control.clear())
-                              ],
-                            ),
-                            SizedBox(
-                              height: 8,
-                            ),
-                            UserImagePicker(_pickedImage),
-                            // ElevatedButton(
-                            //     child: Icon(Icons.save),
-                            //     onPressed: () => null // _captureAndSharePng()
-                            //     ),
+              // drawer: LeadingDrawer('sign_chop'),
+              backgroundColor: Colors.white,
+              body: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth:
+                          ResponsiveWidget.isSmallScreen(context) ? 300 : 400),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        CenterBoldText("${u.title} ${u.name}"),
+                        CenterBoldText("MMC / LJM no: ${u.reg}"),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          'Sign here:',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                            constraints:
+                                BoxConstraints(minHeight: 240, minWidth: 240),
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                              color: Colors.black,
+                              width: 1,
+                            )),
+                            child: ww),
+                        SizedBox(
+                          height: 4,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            // put a small circular avatar with sign image as the background
+                            // click and show the sign like a xray picture
+                            ElevatedButton(
+                                child: Icon(Icons.delete),
+                                onPressed: () => control.clear()),
+                            ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.red)),
+                                child: Icon(Icons.save),
+                                onPressed: () async => ecController.bb =
+                                    await control.toImage(
+                                        background: Colors.white)),
                           ],
                         ),
-                      ),
+                        Expanded(
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: <Widget>[
+                              SizedBox(
+                                height: 8,
+                              ),
+                              RichText(
+                                textAlign: TextAlign.start,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Try Out Sign & Chop before ',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    WidgetSpan(
+                                      child: Icon(
+                                        Icons.save,
+                                        color: Colors.red,
+                                        size: 17,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' :',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                  '* Saved Signature and Chop CAN\'T be deleted',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 10)),
+                              ElevatedButton.icon(
+                                icon: Icon(Icons.picture_as_pdf),
+                                label: BoldButtonText('Try Out'),
+                                // need to disable button on refresh
+                                onPressed: () => Get.to(TestScDiscNote()),
+                              ),
+                              BoldButtonText('Saved Signature:'),
+                              BoldButtonText('Saved Chop Image:'),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              // Row()...
+                              UserImagePicker(_pickedImage),
+                              // ElevatedButton(
+                              //     child: Icon(Icons.save),
+                              //     onPressed: () => null // _captureAndSharePng()
+                              //     ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  )));
+                  ),
+                ),
+              ));
         } else {
           return Center(child: CircularProgressIndicator());
         }

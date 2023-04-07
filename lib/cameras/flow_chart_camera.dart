@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+// import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:mahospital/constants/controllers.dart';
 
 class FlowChartCamera extends StatefulWidget {
@@ -19,8 +21,9 @@ class FlowChartCamera extends StatefulWidget {
 class FlowChartCameraState extends State<FlowChartCamera> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
-  TextDetector _textDetector = GoogleMlKit.vision.textDetector();
-  late RecognisedText regText;
+  TextRecognizer _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  // GoogleMlKit.vision.textRecognizer();
+  late RecognizedText regText;
   List<String> idenTexts = [
     'HGB',
     'HCT',
@@ -91,6 +94,7 @@ class FlowChartCameraState extends State<FlowChartCamera> {
     _controller = CameraController(
       widget.camera,
       ResolutionPreset.high,
+      enableAudio: false,
     );
 
     _initializeControllerFuture = _controller.initialize();
@@ -111,24 +115,36 @@ class FlowChartCameraState extends State<FlowChartCamera> {
   Future<void> interpret(String path) async {
     // if (path != null) {
     var inputImage = InputImage.fromFilePath(path);
-    regText = await _textDetector.processImage(inputImage);
+    regText = await _textRecognizer.processImage(inputImage);
     for (var bl in regText.blocks) {
       if (isNumeric(bl.text)) {
-        var coords = bl.cornerPoints.reduce((i, j) => i + j);
-        numbers.add(NumberWithCoor(bl.text, coords / 4));
+        Point<int> coords = bl.cornerPoints.reduce((i, j) => i + j);
+        numbers.add(NumberWithCoor(
+          bl.text,
+          Point(
+            coords.x / 4,
+            coords.y / 4,
+          ),
+        ));
         // } else if (idenTexts.contains(bl.text)) {
       } else if (idenTexts.any((item) => bl.text.contains(item))) {
         // damn - fixed. im a genius
         var coords = bl.cornerPoints.reduce((i, j) => i + j);
         var idenParam = idenTexts.firstWhere((item) => bl.text.contains(item));
-        identifiers.add(TextWithCoor(idenParam, coords / 4));
+        identifiers.add(TextWithCoor(
+          idenParam,
+          Point(
+            coords.x / 4,
+            coords.y / 4,
+          ),
+        ));
       }
     }
     if (identifiers.isNotEmpty) {
       for (var iden in identifiers) {
-        numbers.sort((a, b) => (a.center.dy - iden.center.dy)
+        numbers.sort((a, b) => (a.center.y - iden.center.y)
             .abs()
-            .compareTo((b.center.dy - iden.center.dy).abs()));
+            .compareTo((b.center.y - iden.center.y).abs()));
         results[iden.param] = numbers.first.param;
       }
     }
@@ -218,12 +234,12 @@ class FlowChartCameraState extends State<FlowChartCamera> {
 
 class TextWithCoor {
   String param;
-  Offset center;
+  Point center;
   TextWithCoor(this.param, this.center);
 }
 
 class NumberWithCoor {
   String param;
-  Offset center;
+  Point center;
   NumberWithCoor(this.param, this.center);
 }

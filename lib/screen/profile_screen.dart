@@ -7,8 +7,10 @@ import 'package:get/get.dart';
 import 'package:hand_signature/signature.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
+import 'package:mahospital/helpers/fonts/center_bold.dart';
 import 'package:mahospital/models/local_user.dart';
 import 'package:mahospital/models/user.dart';
+import 'package:mahospital/screen/sign_chop.dart';
 import 'package:mahospital/widget/leading_drawer.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:ui' as ui;
@@ -16,6 +18,8 @@ import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 
 import 'package:mahospital/cameras/qr_view.dart';
 import 'package:number_display/number_display.dart';
+
+import '../helpers/reponsiveness.dart';
 // import "package:unorm_dart/unorm_dart.dart" as unorm;
 // import 'package:normalizer/normalizer.dart';
 
@@ -37,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late UserModel u;
   late Future<DocumentSnapshot> getUser;
 
-  late HandSignaturePainterView ww;
+  late HandSignature ww;
   final GlobalKey globalKey = new GlobalKey();
   final TextEditingController chop = TextEditingController();
   final display = createDisplay(
@@ -54,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    ww = HandSignaturePainterView(
+    ww = HandSignature(
       control: control,
       color: Colors.blueGrey,
       width: 1.0,
@@ -164,7 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     // UserModel u = ac.getUserModel;
-    var platform = Theme.of(context).platform;
+    // var platform = Theme.of(context).platform;
     return
         // Obx(() =>
         FutureBuilder<DocumentSnapshot>(
@@ -192,212 +196,207 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               drawer: LeadingDrawer('profile'),
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Colors.white,
               body: WillPopScope(
                   onWillPop: onWillPop,
                   child: Center(
-                    child: Card(
-                      margin: EdgeInsets.all(20),
-                      child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                          maxWidth: ResponsiveWidget.isSmallScreen(context)
+                              ? 300
+                              : 400),
+                      child: ListView(
                         padding: EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: () => print('Heyya'),
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () => print('Heyya'),
+                            child: Center(
                               child: CircleAvatar(
-                                  radius: 60,
-                                  backgroundColor: Color(0xffdadada),
-                                  backgroundImage: NetworkImage(u.imageUrl)),
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Text("${u.title} ${u.name}"),
-                            Text("(${u.shortName})"),
-                            // Image.network(
-                            //     'https://w7.pngwing.com/pngs/285/139/png-transparent-elephant-animal-africa-transparent-background-white-background.png'),
-                            // Image.asset('assets/images/mo_truth.png'),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text("MMC / LJM no: ${u.reg}"),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text(u.verified ? 'Verified' : 'Not Verified'),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            ElevatedButton(
-                              child: Text('Refresh'),
-                              // need to disable button on refresh
-                              onPressed: () => setState(() {}),
-                            ),
-                            SizedBox(
-                              height: 7,
-                            ),
-                            // ElevatedButton(
-                            //   child: Text('Test function'),
-                            //   onPressed: () async {
-                            //     await checkAddMember.call(<String, dynamic>{
-                            //       'adderId': 'PifZco40b8M4qaFf5nthkWvTHH23',
-                            //       'newMemberId': '88lz67dGyRYlvYLTigqJP6N7m3p2',
-                            //       'deptId': 'yugM79fSb48P8D06rQqE',
-                            //       'hospId': '1BPiyIe6E6JAJrBOorpy',
-                            //     }).then((v) {
-                            //       // Get.defaultDialog(title: v.data.toString());
-                            //       // setState(() => addMemberLoading = false);
-                            //       print(v.data);
-                            //     }).catchError((e) {
-                            //       print(e);
-                            //       Get.snackbar(
-                            //         'Error Adding Member',
-                            //         e.toString(),
-                            //         snackPosition: SnackPosition.BOTTOM,
-                            //         backgroundColor: Colors.red,
-                            //       );
-                            //       // setState(() => addMemberLoading = false);
-                            //     });
-                            //   },
-                            // ),
-                            // SizedBox(
-                            //   height: 7,
-                            // ),
-                            if (u.verified && (isWebMobile || isApp))
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.qr_code_scanner),
-                                label: Text('Verify a Colleague'),
-                                // child: RichText(
-                                //   text: TextSpan(
-                                //     children: [
-                                //       WidgetSpan(
-                                //         child: Icon(
-                                //           Icons.qr_code_scanner,
-                                //           size: 18,
-                                //         ),
-                                //       ),
-                                //       TextSpan(
-                                //           text: ' Verify a Colleague',
-                                //           style: TextStyle(
-                                //             color: Colors.white,
-                                //           )),
-                                //     ],
-                                //   ),
-                                // ),
-                                onPressed: () async {
-                                  final String? memberId =
-                                      await Navigator.of(context).push<String>(
-                                    MaterialPageRoute(
-                                      builder: (c) {
-                                        return QrView(
-                                            'Scan colleague\s QR code');
-                                      },
-                                    ),
-                                  );
-                                  // Get.snackbar(
-                                  //   "Show result code",
-                                  //   memberId.toString(),
-                                  //   snackPosition: SnackPosition.BOTTOM,
-                                  //   backgroundColor: Colors.pink,
-                                  // );
-
-                                  DocumentSnapshot<Object?> coll = await userRef
-                                      .doc(memberId.toString())
-                                      .get();
-                                  print(memberId);
-                                  if (coll.exists && !coll.get('verified')) {
-                                    userRef.doc(memberId).update({
-                                      'verified': true,
-                                      'verifiedBy': uid
-                                    }).then((_) {
-                                      Get.snackbar(
-                                        coll.get('name') + " Verified",
-                                        coll.get('shortName') +
-                                            ' can now access patients\' record',
-                                        snackPosition: SnackPosition.BOTTOM,
-                                        backgroundColor: Colors.blue,
-                                      );
-                                    });
-                                  }
-                                },
+                                radius: 70,
+                                backgroundColor: Color(0xffdadada),
+                                backgroundImage: NetworkImage(u.imageUrl),
+                                // standardise with FileImage before saving baaaaaaaa TMD
                               ),
-                            QrImage(
+                            ),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          CenterBoldText("${u.title} ${u.name}"),
+                          CenterBoldText("(${u.shortName})"),
+                          // Image.network(
+                          //     'https://w7.pngwing.com/pngs/285/139/png-transparent-elephant-animal-africa-transparent-background-white-background.png'),
+                          // Image.asset('assets/images/mo_truth.png'),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          CenterBoldText("MMC / LJM no: ${u.reg}"),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          CenterBoldText(u.verified
+                              ? 'Status: Verified'
+                              : 'Status: Not Verified'),
+                          CenterBoldText("Email: ${u.email}"),
+                          SizedBox(
+                            height: 4,
+                          ),
+                          Center(
+                            child: QrImage(
                               backgroundColor: Colors.white,
                               data: uid,
                               version: QrVersions.auto,
                               size: 200.0,
                             ),
-                            SizedBox(
-                              height: 10,
+                          ),
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.refresh),
+                            label: BoldButtonText('Refresh Page'),
+                            // need to disable button on refresh
+                            onPressed: () => setState(() {}),
+                          ),
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.draw),
+                            label: BoldButtonText('Sign & Chop'),
+                            onPressed: () => Get.to(SignChop()),
+                          ),
+                          SizedBox(
+                            height: 11,
+                          ),
+                          if (u.verified && (isWebMobile || isApp))
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.qr_code_scanner),
+                              label: BoldButtonText('Verify a Colleague'),
+                              onPressed: () async {
+                                final String? memberId =
+                                    await Navigator.of(context).push<String>(
+                                  MaterialPageRoute(
+                                    builder: (c) {
+                                      return QrView('Scan colleague\s QR code');
+                                    },
+                                  ),
+                                );
+                                // Get.snackbar(
+                                //   "Show result code",
+                                //   memberId.toString(),
+                                //   snackPosition: SnackPosition.BOTTOM,
+                                //   backgroundColor: Colors.pink,
+                                // );
+
+                                DocumentSnapshot<Object?> coll = await userRef
+                                    .doc(memberId.toString())
+                                    .get();
+                                print(memberId);
+                                if (coll.exists && !coll.get('verified')) {
+                                  userRef.doc(memberId).update({
+                                    'verified': true,
+                                    'verifiedBy': uid
+                                  }).then((_) {
+                                    Get.snackbar(
+                                      coll.get('name') + " Verified",
+                                      coll.get('shortName') +
+                                          ' can now access patients\' record',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      backgroundColor: Colors.blue,
+                                    );
+                                  });
+                                }
+                              },
                             ),
 
-                            // created sign widget
-                            // Container(
-                            //     constraints: BoxConstraints(
-                            //         minHeight: 200, minWidth: 200),
-                            //     decoration: BoxDecoration(
-                            //         border: Border.all(
-                            //       color: Colors.black,
-                            //       width: 1,
-                            //     )),
-                            //     // color: Colors.white,
-                            //     child: ww),
-                            // SizedBox(
-                            //   height: 4,
-                            // ),
-                            // ElevatedButton(
-                            //     child: Icon(Icons.save),
-                            //     onPressed: () async => ecController.bb =
-                            //         await control.toImage(
-                            //             background: Colors.white)),
-                            // ElevatedButton(
-                            //     child: Icon(Icons.delete),
-                            //     onPressed: () => control.clear()),
-                            // SizedBox(
-                            //   height: 8,
-                            // ),
-                            // SizedBox(
-                            //   width: 200,
-                            //   child: TextFormField(
-                            //     style: TextStyle(fontSize: 10),
-                            //     controller: chop,
-                            //     keyboardType: TextInputType.multiline,
-                            //     maxLines: null,
-                            //     decoration: InputDecoration(
-                            //       labelText: 'Chop',
-                            //       suffixIcon: IconButton(
-                            //         icon: Icon(Icons.save),
-                            //         onPressed: () => setState(() {}),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                            // SizedBox(height: 4),
-                            // RepaintBoundary(
-                            //   key: globalKey,
-                            //   child: Container(
-                            //     constraints: BoxConstraints(maxWidth: 250),
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.white,
-                            //       border:
-                            //           Border.all(color: Colors.black, width: 2),
-                            //     ),
-                            //     alignment: Alignment.center,
-                            //     child: Text(
-                            //       chop.text,
-                            //       textAlign: TextAlign.center,
-                            //       style: TextStyle(
-                            //           fontSize: 12,
-                            //           fontWeight: FontWeight.w900),
-                            //     ),
-                            //   ),
-                            // ),
-                            // ElevatedButton(
-                            //     child: Icon(Icons.save),
-                            //     onPressed: () => _captureAndSharePng()),
-                          ],
-                        ),
+                          // ElevatedButton(
+                          //   child: Text('Test function'),
+                          //   onPressed: () async {
+                          //     await checkAddMember.call(<String, dynamic>{
+                          //       'adderId': 'PifZco40b8M4qaFf5nthkWvTHH23',
+                          //       'newMemberId': '88lz67dGyRYlvYLTigqJP6N7m3p2',
+                          //       'deptId': 'yugM79fSb48P8D06rQqE',
+                          //       'hospId': '1BPiyIe6E6JAJrBOorpy',
+                          //     }).then((v) {
+                          //       // Get.defaultDialog(title: v.data.toString());
+                          //       // setState(() => addMemberLoading = false);
+                          //       print(v.data);
+                          //     }).catchError((e) {
+                          //       print(e);
+                          //       Get.snackbar(
+                          //         'Error Adding Member',
+                          //         e.toString(),
+                          //         snackPosition: SnackPosition.BOTTOM,
+                          //         backgroundColor: Colors.red,
+                          //       );
+                          //       // setState(() => addMemberLoading = false);
+                          //     });
+                          //   },
+                          // ),
+
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          // created sign widget
+                          // Container(
+                          //     constraints: BoxConstraints(
+                          //         minHeight: 200, minWidth: 200),
+                          //     decoration: BoxDecoration(
+                          //         border: Border.all(
+                          //       color: Colors.black,
+                          //       width: 1,
+                          //     )),
+                          //     // color: Colors.white,
+                          //     child: ww),
+                          // SizedBox(
+                          //   height: 4,
+                          // ),
+                          // ElevatedButton(
+                          //     child: Icon(Icons.save),
+                          //     onPressed: () async => ecController.bb =
+                          //         await control.toImage(
+                          //             background: Colors.white)),
+                          // ElevatedButton(
+                          //     child: Icon(Icons.delete),
+                          //     onPressed: () => control.clear()),
+                          // SizedBox(
+                          //   height: 8,
+                          // ),
+                          // SizedBox(
+                          //   width: 200,
+                          //   child: TextFormField(
+                          //     style: TextStyle(fontSize: 10),
+                          //     controller: chop,
+                          //     keyboardType: TextInputType.multiline,
+                          //     maxLines: null,
+                          //     decoration: InputDecoration(
+                          //       labelText: 'Chop',
+                          //       suffixIcon: IconButton(
+                          //         icon: Icon(Icons.save),
+                          //         onPressed: () => setState(() {}),
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(height: 4),
+                          // RepaintBoundary(
+                          //   key: globalKey,
+                          //   child: Container(
+                          //     constraints: BoxConstraints(maxWidth: 250),
+                          //     decoration: BoxDecoration(
+                          //       color: Colors.white,
+                          //       border:
+                          //           Border.all(color: Colors.black, width: 2),
+                          //     ),
+                          //     alignment: Alignment.center,
+                          //     child: Text(
+                          //       chop.text,
+                          //       textAlign: TextAlign.center,
+                          //       style: TextStyle(
+                          //           fontSize: 12,
+                          //           fontWeight: FontWeight.w900),
+                          //     ),
+                          //   ),
+                          // ),
+                          // ElevatedButton(
+                          //     child: Icon(Icons.save),
+                          //     onPressed: () => _captureAndSharePng()),
+                        ],
                       ),
                     ),
                   )));
@@ -408,15 +407,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-// user == null
-//     ? Center(
-//         child: ElevatedButton(
-//           child: Text('Login to Continue'),
-//           onPressed: () =>
-//               Navigator.of(context).pushReplacementNamed('/login'),
-//         ),
-//       )
-//     :
-
-//remove avoid _userProvidedRouteName != null is not true error

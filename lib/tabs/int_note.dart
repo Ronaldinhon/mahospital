@@ -259,7 +259,7 @@ class _IntNoteState extends State<IntNote> {
     if (printMap.isNotEmpty && ee != start + 1) {
       // while testing entry only had 1 line so the time not printed out haha (printMap empty already)
       if (ee == 1) blanking = false;
-      createdAt = printMap.first['createdAt'];
+      createdAt = int.parse(printMap.first['createdAt']);
       if (currentData.isEmpty && ee < 27 && !blanking) {
         currentData = printMap.first['data'];
         // print(currentData);
@@ -356,14 +356,14 @@ class _IntNoteState extends State<IntNote> {
               color: PdfColors.black,
               width: 1,
             )),
-            child: i == 11
+            child: i == 10
                 ? pw.Transform.rotate(
                     child: pw.Image(profileChop, width: 150, height: 150),
                     angle: -0.3)
-                : i == 10
-                    ? pw.Transform.rotate(
+                : i == 11
+                    ? pw.Transform.translate(
                         child: pw.Image(profileSignt, width: 150, height: 150),
-                        angle: -0.3)
+                        offset: PdfPoint(0, 44))
                     : pw.Text(
                         // getSub()
                         getInLine(i),

@@ -7,6 +7,7 @@ import 'package:hand_signature/signature.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 import 'package:mahospital/models/dept_model.dart';
+import 'package:mahospital/tabs/disc_doc.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:mahospital/widget/rer_card.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -316,7 +317,7 @@ class _DiscEntState extends State<DiscEnt> {
           // ),
           TextFormField(
             key: ValueKey('Disc Sum'),
-            // controller: currentWPLC.dnoteCont,
+            controller: currentWPLC.dnoteCont,
             keyboardType: TextInputType.multiline,
             maxLines: null,
             onChanged: (String sj) {
@@ -352,10 +353,10 @@ class _DiscEntState extends State<DiscEnt> {
             decoration: InputDecoration(
               labelText: 'Disc Sum',
             ),
-            initialValue: ecController.asdljk
-                .map((pls) =>
-                    '${pls.hNum}\n${pls.name}\n${pls.ic}\n${pls.phone}\n${pls.add}')
-                .join('\n\n'),
+            // initialValue: ecController.asdljk
+            //     .map((pls) =>
+            //         '${pls.hNum}\n${pls.name}\n${pls.ic}\n${pls.phone}\n${pls.add}')
+            //     .join('\n\n'),
           ),
           SizedBox(
             height: 4,
@@ -386,7 +387,8 @@ class _DiscEntState extends State<DiscEnt> {
           ),
           ElevatedButton(
             child: Icon(Icons.print),
-            onPressed: () => ecController.printingDisc.value = true,
+            onPressed: () => Get.to(DiscDoc())
+            // ecController.printingDisc.value = true,
           ),
           // SizedBox(
           //   height: 4,

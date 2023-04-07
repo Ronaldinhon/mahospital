@@ -60,48 +60,139 @@ class _WardPdfState extends State<WardPdf> {
     pdf1.addPage(pw.MultiPage(
         maxPages: 50,
         pageFormat: pf.PdfPageFormat.a4,
+        header: (pw.Context context) {
+          return pw.Text('tell me whyyyyyy ${context.pageNumber}');
+        },
         build: (pw.Context context) {
           return <pw.Widget>[
             pw.Table(
                 border: pw.TableBorder.all(color: PdfColor.fromHex("#000000")),
-                children: ecController.asdljk.map((Pt value) {
-                  return pw.TableRow(children: [
-                    pw.Container(
-                        width: 15,
-                        padding: pw.EdgeInsets.all(4.0),
-                        child: pw.Text(stringToBase64.decode(
-                            st.normalize(stringToBase64.encode(value.hNum))))),
-                    pw.Container(
-                        width: 30,
-                        padding: pw.EdgeInsets.all(4.0),
-                        child: pw.Text(stringToBase64.decode(
-                            st.normalize(stringToBase64.encode(value.name))))),
-                    pw.Container(
-                        width: 30,
-                        padding: pw.EdgeInsets.all(4.0),
-                        child: pw.Text(stringToBase64.decode(
-                            st.normalize(stringToBase64.encode(value.ic))))),
-                    pw.Container(
-                        width: 70,
-                        padding: pw.EdgeInsets.all(4.0),
-                        child: pw.Text(stringToBase64.decode(
-                            st.normalize(stringToBase64.encode(value.add))))),
-                    pw.Container(
-                        width: 30,
-                        padding: pw.EdgeInsets.all(4.0),
-                        child: pw.Text(stringToBase64.decode(
-                            st.normalize(stringToBase64.encode(value.phone))))),
-                    // pw.Container(
-                    //     width: 30,
-                    //     padding: pw.EdgeInsets.all(4.0),
-                    //     child: pw.Column(
-                    //         crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    //         children: [
-                    //           pw.Text(
-                    //               'asaslkdjlksdsdlkjlskjslkjdlkjsdlksljdsdljslkdslkdslkdllksldslkdlkdsklsdlklksjlkjsdlkjslkdjsldkjsksdlkjlsdkjlskjlksdjlksdjlksjlkjsdlkjsdlksjdlksdjlslkjldkjslkjsk')
-                    //         ])),
-                  ]);
-                }).toList()),
+                children: [
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text('slaskjd\nlasdj\nlaksdjl\nalskdj')),
+                    pw.Padding(
+                        padding: pw.EdgeInsets.all(7),
+                        child: pw.Text(
+                            'slasdljlfksjlkfjsskjd\nladfsfsfsdsdj\nlhkhjhaksdjl\nalaskjhjhaslskdjfslkdjfsdlkjsdfslkfsldkfjskdjsks skhjfskdhf sdkfhksfhsdkjh sdjfhsdkfh ssjhfsdh fksdjh sdfkhsdfkhdskfh sdkfjhskfhkdsjhf sdkfjhskfhdsfh skfsdhfk sdkfjsh skdfhskhskjdhfkjsdhfksdhhsdkfs sdkfjhshfskjhfkdhfhskjhfskhfskh sdkfhskhfkshksdhfs sdkfhhksdhfkjsf'))
+                  ]),
+                ],
+                columnWidths: {
+                  0: pw.FractionColumnWidth(1),
+                  1: pw.FractionColumnWidth(3)
+                }
+                // ecController.asdljk.map((Pt value) {
+                //   return pw.TableRow(children: [
+                //     pw.Container(
+                //         width: 15,
+                //         padding: pw.EdgeInsets.all(4.0),
+                //         child: pw.Text(stringToBase64.decode(
+                //             st.normalize(stringToBase64.encode(value.hNum))))),
+                //     pw.Container(
+                //         width: 30,
+                //         padding: pw.EdgeInsets.all(4.0),
+                //         child: pw.Text(stringToBase64.decode(
+                //             st.normalize(stringToBase64.encode(value.name))))),
+                //     pw.Container(
+                //         width: 30,
+                //         padding: pw.EdgeInsets.all(4.0),
+                //         child: pw.Text(stringToBase64.decode(
+                //             st.normalize(stringToBase64.encode(value.ic))))),
+                //     pw.Container(
+                //         width: 70,
+                //         padding: pw.EdgeInsets.all(4.0),
+                //         child: pw.Text(stringToBase64.decode(
+                //             st.normalize(stringToBase64.encode(value.add))))),
+                //     pw.Container(
+                //         width: 30,
+                //         padding: pw.EdgeInsets.all(4.0),
+                //         child: pw.Text(stringToBase64.decode(
+                //             st.normalize(stringToBase64.encode(value.phone))))),
+                //     // pw.Container(
+                //     //     width: 30,
+                //     //     padding: pw.EdgeInsets.all(4.0),
+                //     //     child: pw.Column(
+                //     //         crossAxisAlignment: pw.CrossAxisAlignment.start,
+                //     //         children: [
+                //     //           pw.Text(
+                //     //               'asaslkdjlksdsdlkjlskjslkjdlkjsdlksljdsdljslkdslkdslkdllksldslkdlkdsklsdlklksjlkjsdlkjslkdjsldkjsksdlkjlsdkjlskjlksdjlksdjlksjlkjsdlkjsdlksjdlksdjlslkjldkjslkjsk')
+                //     //         ])),
+                //   ]);
+                // }).toList()
+                ),
           ];
         }));
   }

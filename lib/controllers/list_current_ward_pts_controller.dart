@@ -18,8 +18,8 @@ class CurrentWardPtsListController extends GetxController {
   int currentIndex = 0; //set initial as 0 when there is no pt
   List<WardPtModel> _currentWardPtsModelList = [];
   Rx<WardModel> cwm = WardModel().obs;
-  Rx<WardPtModel> cwpm = WardPtModel().obs;
-  Rx<BedModel> cbm = BedModel().obs;
+  Rx<WardPtModel> cwpm = WardPtModel().obs; //currentWardPtModal
+  Rx<BedModel> cbm = BedModel().obs; //currentBedModal
   Rx aptb = false.obs; //addmitingPtToBed
   List<BedModel> currentBML = []; //currentBedModelList
   TextEditingController yeah = TextEditingController(text: '');
@@ -97,6 +97,7 @@ class CurrentWardPtsListController extends GetxController {
     updatingPt.value = false;
   }
 
+  // this is for changing pt in pt screen
   void updatePtDetailsConts(WardPtModel model) {
     isSelected = [false, false, false];
     isSelected[model.genderIndex] = true;
@@ -115,6 +116,7 @@ class CurrentWardPtsListController extends GetxController {
     // ecController.entries = model.entries; // how to update when new entry is added
   }
 
+  // this is when dr/sn update pt details
   void updateCurrentWPM() {
     WardPtModel temporr = cwpm.value;
     temporr.name = cpName.text;

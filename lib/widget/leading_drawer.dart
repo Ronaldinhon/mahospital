@@ -80,7 +80,7 @@ class _LeadingDrawerState extends State<LeadingDrawer> {
                 tileColor: Theme.of(context).primaryColor,
               ),
               produceTile(context, 'Profile', 'profile'),
-              produceTile(context, 'Sign & Chop', 'sign_chop'),
+              produceTile(context, 'Pt Search', 'sign_chop'),
               !userController.user.verified
                   ? Container()
                   : produceTile(context, 'Add / Search Hospital', 'as_hosp'),

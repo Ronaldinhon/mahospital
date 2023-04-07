@@ -30,8 +30,9 @@ class EntryChartController extends GetxController {
 
   RxInt start = 10000.obs;
   RxInt end = 10000.obs;
+  // need to try out above
 
-  RxString editId = ''.obs;
+  late RxString editId = ''.obs;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -75,18 +76,20 @@ class EntryChartController extends GetxController {
   late ByteData? cc;
 
   List<Pt> asdljk = [];
+  late Future<RxList<List<String>>> bloodIx;
 
-  List<String> bloodParam = [
-    'Hb',
-    'Hct',
-    'Plt',
-    'Twc',
-    'Na',
-    'K',
-    'Cl',
-    'Urea',
-    'Creat',
-  ];
+
+  // List<String> bloodParam = [
+  //   'Hb',
+  //   'Hct',
+  //   'Plt',
+  //   'Twc',
+  //   'Na',
+  //   'K',
+  //   'Cl',
+  //   'Urea',
+  //   'Creat',
+  // ];
 
   Map<String, String> ecCorrespondKeys = {};
   List<String> ecIdenTexts = [];
@@ -106,6 +109,46 @@ class EntryChartController extends GetxController {
         'no need to trace shit anymore, everything is at your finger tip.',
     'dni': 'DIL NAR issued, patient family understood'
   };
+
+  TextEditingController entryCont = TextEditingController();
+  TextEditingController dxCont = TextEditingController();
+  TextEditingController planCont = TextEditingController();
+  TextEditingController drugCont = TextEditingController();
+
+  RxMap<String, String> vitalsTitle = {
+    'HR/min': '',
+    'SYS/mmHg': '',
+    'DIA/mmHg': '',
+    'RR/min': '',
+    'SpO2': '',
+    'Temp': '',
+    'Notes': '',
+  }.obs;
+
+  RxMap<String, String> bloodResMap = {
+    'Hb': '',
+    'Hct': '',
+    'Plt': '',
+    'Twc': '',
+    'Na': '',
+    'K': '',
+    'Cl': '',
+    'Urea': '',
+    'Creat': '',
+    'TProt': '',
+    'Alb': '',
+    'Glob': '',
+    'TBil': '',
+    'ALT': '',
+    'AST': '',
+    'ALP': '',
+    'Ca': '', // watchout
+    'Phos': '',
+    'Mg': '',
+    'CK': '',
+    'LDH': '',
+    'Notes': '',
+  }.obs;
 
   void makeStart(int index) {
     start.value = index;

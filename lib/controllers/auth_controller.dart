@@ -45,6 +45,7 @@ class AuthController extends GetxController {
     super.onReady();
     _firebaseUser = Rx<User?>(auth.currentUser);
     _firebaseUser.bindStream(auth.userChanges());
+    print('Does this get called in if put on permanent?');
     ever(_firebaseUser, _setInitialScreen);
   }
 

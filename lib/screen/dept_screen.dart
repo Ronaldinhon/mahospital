@@ -10,6 +10,8 @@ import 'package:mahospital/models/user.dart';
 import 'package:mahospital/models/ward_model.dart';
 import 'package:mahospital/screen/qr_camera_screen.dart';
 import 'package:mahospital/screen/ward_screen.dart';
+import '../helpers/fonts/center_bold.dart';
+import '../helpers/reponsiveness.dart';
 import '/widget/leading_drawer.dart';
 import 'as_ward_screen.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
@@ -190,212 +192,309 @@ class _DeptScreenState extends State<DeptScreen> {
           ),
         ),
         drawer: LeadingDrawer(departmentModel.id),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Colors.white,
         body: WillPopScope(
           onWillPop: onWillPop,
           child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 500),
-              child: Card(
-                margin: EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            child: Text('Refresh'),
-                            // need to disable button on refresh
-                            onPressed: () {
-                              departmentModel.wardsInitialised = false;
-                              departmentModel.membersInitialised = false;
-                              setState(() {});
-                            },
-                          )
-                        ],
-                      ),
-                      CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Color(0xffdadada),
-                          backgroundImage:
-                              NetworkImage(departmentModel.imageUrl)),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      if (isMember)
-                        ElevatedButton(
-                          child: Text('Add Ward'),
-                          onPressed: () async {
-                            Get.to(AsWardScreen(departmentModel));
-                            // below line - why is it future?
-                            // Navigator.pushNamed(
-                            //   context,
-                            //   '/as_ward',
-                            // );
-                            // if (wardId != null) getDept(); - just refresh after that lah
-                          },
-                        ),
-                      // add text shortcut here
-                      if (isMember)
-                        SizedBox(
-                          height: 10,
-                        ),
-                      if (isMember && (isWebMobile || isApp))
-                        if (addMemberLoading)
-                          CircularProgressIndicator()
-                        else
-                          ElevatedButton.icon(
-                            icon: Icon(Icons.qr_code_scanner),
-                            label: Text('Add Dept Member'),
-                            // ElevatedButton(
-                            //   child: RichText(
-                            //     text: TextSpan(
-                            //       children: [
-                            //         WidgetSpan(
-                            //             child: Icon(Icons.qr_code_scanner),
-                            //             style: TextStyle(fontSize: 18)),
-                            //         TextSpan(text: ' Add Member'),
-                            //       ],
-                            //     ),
-                            //   ),
-                            onPressed: () async {
-                              String? memberId =
-                                  await Navigator.of(context).push<String>(
-                                MaterialPageRoute(
-                                  builder: (c) {
-                                    return QrView('Scan colleague\s QR code');
-                                  },
-                                ),
-                              );
-                              // await Get.to(QrCameraScreen(
-                              //     'Scan colleage\'s profile QR code'));
+              constraints: BoxConstraints(
+                  maxWidth:
+                      ResponsiveWidget.isSmallScreen(context) ? 340 : 400),
+              child: ListView(
+                padding: EdgeInsets.all(20),
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        child: Text('Refresh'),
+                        // need to disable button on refresh
+                        onPressed: () {
+                          departmentModel.wardsInitialised = false;
+                          departmentModel.membersInitialised = false;
+                          setState(() {});
+                        },
+                      )
+                    ],
+                  ),
+                  Center(
+                    child: CircleAvatar(
+                        radius: 70,
+                        backgroundColor: Color(0xffdadada),
+                        backgroundImage:
+                            NetworkImage(departmentModel.imageUrl)),
+                  ),
+                  CenterBoldText(departmentModel.name),
+                  CenterBoldText(' (${departmentModel.hospShortName})'),
 
-                              // final String? memberId =
-                              //     await Navigator.of(context).push<String>(
-                              //   MaterialPageRoute(
-                              //     builder: (c) {
-                              //       return QrCameraScreen(
-                              //           'Add member by scanning user\'s profile QR code');
-                              //     },
-                              //   ),
-                              // );
-                              if (departmentModel.members.contains(memberId)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text('Already a member of department.'),
-                                  ),
-                                );
-                              } else {
-                                addMember(memberId!);
-                              }
-                            },
-                          ),
-                      if (isWebMobile && isMember)
-                        SizedBox(
-                          height: 10,
-                        ),
-                      if (isMember)
-                        FutureBuilder(
-                          future: iniWards(),
+                  // if (isWebMobile && isMember)
+                  //   SizedBox(
+                  //     height: 10,
+                  //   ),
+                  // if (isMember)
+                  //   FutureBuilder(
+                  //     future: iniWards(),
+                  //     builder: (BuildContext context,
+                  //         AsyncSnapshot<dynamic> snapshot) {
+                  //       if (snapshot.connectionState ==
+                  //           ConnectionState.done) {
+                  //         return Column(
+                  //           children: [
+                  //             ExpansionTile(
+                  //               title: Text('Wards'),
+                  //               subtitle: Text(dmwm.length.toString()),
+                  //               children: dmwm.length > 0
+                  //                   ? dmwm
+                  //                       .map((wm) => ListTile(
+                  //                           title: new Text(wm.name),
+                  //                           onTap: () =>
+                  //                               Get.to(WardScreen(wm))))
+                  //                       .toList()
+                  //                   : [],
+                  //               initiallyExpanded: true,
+                  //             ),
+                  //             // SizedBox(
+                  //             //   height: 10,
+                  //             // ),
+                  //             // ExpansionTile(
+                  //             //   title: Text('Peri Pts'),
+                  //             //   subtitle: Text(departmentModel.lpwpm.length
+                  //             //       .toString()),
+                  //             //   children: departmentModel.lpwpm.length > 0
+                  //             //       ? departmentModel.lpwpm
+                  //             //           .map((wpm) => ListTile(
+                  //             //                 title: new Text(wpm.name),
+                  //             //                 // onTap: () =>
+                  //             //                 //     Get.to(WardScreen(wm))
+                  //             //                 trailing: Text(
+                  //             //                     wpm.wardId.isNotEmpty
+                  //             //                         ? 'Cur-Ad'
+                  //             //                         : ''),
+                  //             //               ))
+                  //             //           .toList()
+                  //             //       : [],
+                  //             //   initiallyExpanded: true,
+                  //             // ),
+                  //           ],
+                  //         );
+                  //       } else {
+                  //         return CircularProgressIndicator();
+                  //       }
+                  //     },
+                  //   )
+                  // else
+                  //   Text('Request for Department Membership to view Wards'),
+                  // SizedBox(
+                  //   height: 5,
+                  // ),
+                  // Divider(
+                  //   color: Colors.purple,
+                  //   thickness: 3,
+                  // ),
+                  // SizedBox(
+                  //   height: 5,
+                  // ),
+                  // FutureBuilder(
+                  //   future: iniMembers(),
+                  //   builder: (BuildContext context,
+                  //       AsyncSnapshot<dynamic> snapshot) {
+                  //     if (snapshot.connectionState ==
+                  //         ConnectionState.done) {
+                  //       return Theme(
+                  //           data: Theme.of(context).copyWith(
+                  //               dividerTheme: DividerThemeData(
+                  //                   color: Colors.transparent,
+                  //                   thickness: 3.5)),
+                  //           child: ExpansionTile(
+                  //             title: Text('leijin'),
+                  //             subtitle: Text(dmmm.length.toString()),
+                  //             children: dmmm.length > 0
+                  //                 ? dmmm
+                  //                     .map((mm) => ListTile(
+                  //                           title: new Text(mm.name),
+                  //                           leading: CircleAvatar(
+                  //                             backgroundImage:
+                  //                                 NetworkImage(mm.imageUrl),
+                  //                           ),
+                  //                         ))
+                  //                     .toList()
+                  //                 : [],
+                  //             initiallyExpanded: false,
+                  //           ));
+                  //     } else {
+                  //       return CircularProgressIndicator();
+                  //     }
+                  //   },
+                  // ),
+
+                  // ============================================================
+                  SizedBox(height: 10),
+                  ExpansionPanelList
+                      .radio(dividerColor: Colors.blue, children: [
+                    ExpansionPanelRadio(
+                        value: 'ward',
+                        canTapOnHeader: true,
+                        headerBuilder: (context, isExpanded) {
+                          return ListTile(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                              Radius.circular(4),
+                            )),
+                            leading: Icon(Icons.other_houses),
+                            title: BoldButtonText('Wards'),
+                            tileColor: isExpanded ? Colors.blue : Colors.white,
+                          );
+                        },
+                        body: !isMember
+                            ? Text(
+                                'Request for Department Membership to view Wards')
+                            : FutureBuilder(
+                                future: iniWards(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<dynamic> snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    return Column(
+                                      children: dmwm.length > 0
+                                          ? dmwm
+                                              .map((wm) => ListTile(
+                                                    title: new Text(wm.name),
+                                                    onTap: () =>
+                                                        Get.to(WardScreen(wm)),
+                                                    leading: CircleAvatar(
+                                                      backgroundImage:
+                                                          NetworkImage(
+                                                              wm.imageUrl),
+                                                    ),
+                                                  ))
+                                              .toList()
+                                          : [],
+                                    );
+                                  } else {
+                                    return CircularProgressIndicator();
+                                  }
+                                },
+                              )),
+                    ExpansionPanelRadio(
+                        value: 'member',
+                        canTapOnHeader: true,
+                        headerBuilder: (context, isExpanded) {
+                          return ListTile(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                              Radius.circular(4),
+                            )),
+                            leading: Icon(Icons.person),
+                            title: BoldButtonText('Dept Members'),
+                            tileColor: isExpanded ? Colors.blue : Colors.white,
+                          );
+                        },
+                        body: FutureBuilder(
+                          future: iniMembers(),
                           builder: (BuildContext context,
                               AsyncSnapshot<dynamic> snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.done) {
                               return Column(
-                                children: [
-                                  ExpansionTile(
-                                    title: Text('Wards'),
-                                    subtitle: Text(dmwm.length.toString()),
-                                    children: dmwm.length > 0
-                                        ? dmwm
-                                            .map((wm) => ListTile(
-                                                title: new Text(wm.name),
-                                                onTap: () =>
-                                                    Get.to(WardScreen(wm))))
-                                            .toList()
-                                        : [],
-                                    initiallyExpanded: true,
-                                  ),
-                                  // SizedBox(
-                                  //   height: 10,
-                                  // ),
-                                  // ExpansionTile(
-                                  //   title: Text('Peri Pts'),
-                                  //   subtitle: Text(departmentModel.lpwpm.length
-                                  //       .toString()),
-                                  //   children: departmentModel.lpwpm.length > 0
-                                  //       ? departmentModel.lpwpm
-                                  //           .map((wpm) => ListTile(
-                                  //                 title: new Text(wpm.name),
-                                  //                 // onTap: () =>
-                                  //                 //     Get.to(WardScreen(wm))
-                                  //                 trailing: Text(
-                                  //                     wpm.wardId.isNotEmpty
-                                  //                         ? 'Cur-Ad'
-                                  //                         : ''),
-                                  //               ))
-                                  //           .toList()
-                                  //       : [],
-                                  //   initiallyExpanded: true,
-                                  // ),
-                                ],
+                                children: dmmm.length > 0
+                                    ? dmmm
+                                        .map((mm) => ListTile(
+                                              title: new Text(mm.name),
+                                              // onTap: () =>
+                                              //     Get.to(MemberScreen(mm)),
+                                              leading: CircleAvatar(
+                                                  backgroundImage: NetworkImage(
+                                                      mm.imageUrl)),
+                                            ))
+                                        .toList()
+                                    : [],
                               );
                             } else {
                               return CircularProgressIndicator();
                             }
                           },
-                        )
-                      else
-                        Text('Request for Department Membership to view Wards'),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Divider(
-                        color: Colors.purple,
-                        thickness: 3,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      FutureBuilder(
-                        future: iniMembers(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<dynamic> snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            return Theme(
-                                data: Theme.of(context).copyWith(
-                                    dividerTheme: DividerThemeData(
-                                        color: Colors.transparent,
-                                        thickness: 3.5)),
-                                child: ExpansionTile(
-                                  title: Text('leijin'),
-                                  subtitle: Text(dmmm.length.toString()),
-                                  children: dmmm.length > 0
-                                      ? dmmm
-                                          .map((mm) => ListTile(
-                                                title: new Text(mm.name),
-                                                leading: CircleAvatar(
-                                                  backgroundImage:
-                                                      NetworkImage(mm.imageUrl),
-                                                ),
-                                              ))
-                                          .toList()
-                                      : [],
-                                  initiallyExpanded: false,
-                                ));
+                        )),
+                  ]),
+                  SizedBox(height: 17),
+                  if (isMember)
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.other_houses),
+                      label: BoldButtonText('Add Ward'),
+                      onPressed: () async {
+                        Get.to(AsWardScreen(departmentModel));
+                        // below line - why is it future?
+                        // Navigator.pushNamed(
+                        //   context,
+                        //   '/as_ward',
+                        // );
+                        // if (wardId != null) getDept(); - just refresh after that lah
+                      },
+                    ),
+                  // add text shortcut here
+                  if (isMember)
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.local_hospital),
+                      label: BoldButtonText('Add Clinic'),
+                      onPressed: () {},
+                    ),
+                  if (isMember)
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.abc),
+                      label: BoldButtonText('Add Shorthands'),
+                      onPressed: () {},
+                    ),
+                  if (isMember && (isWebMobile || isApp))
+                    if (addMemberLoading)
+                      CircularProgressIndicator()
+                    else
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.qr_code_scanner),
+                        label: BoldButtonText('Add Dept Member'),
+                        // ElevatedButton(
+                        //   child: RichText(
+                        //     text: TextSpan(
+                        //       children: [
+                        //         WidgetSpan(
+                        //             child: Icon(Icons.qr_code_scanner),
+                        //             style: TextStyle(fontSize: 18)),
+                        //         TextSpan(text: ' Add Member'),
+                        //       ],
+                        //     ),
+                        //   ),
+                        onPressed: () async {
+                          String? memberId =
+                              await Navigator.of(context).push<String>(
+                            MaterialPageRoute(
+                              builder: (c) {
+                                return QrView('Scan colleague\s QR code');
+                              },
+                            ),
+                          );
+                          // await Get.to(QrCameraScreen(
+                          //     'Scan colleage\'s profile QR code'));
+
+                          // final String? memberId =
+                          //     await Navigator.of(context).push<String>(
+                          //   MaterialPageRoute(
+                          //     builder: (c) {
+                          //       return QrCameraScreen(
+                          //           'Add member by scanning user\'s profile QR code');
+                          //     },
+                          //   ),
+                          // );
+                          if (departmentModel.members.contains(memberId)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content:
+                                    Text('Already a member of department.'),
+                              ),
+                            );
                           } else {
-                            return CircularProgressIndicator();
+                            addMember(memberId!);
                           }
                         },
-                      )
-                    ],
-                  ),
-                ),
+                      ),
+                ],
               ),
             ),
           ),

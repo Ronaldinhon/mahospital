@@ -94,45 +94,76 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
 
             return Obx(() => Scaffold(
                   appBar: AppBar(
+                    leading: GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.white,
+                        size: 25,
+                      ),
+                    ),
                     title: Row(
                       children: [
-                        ElevatedButton(
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.white),
-                              visualDensity:
-                                  VisualDensity(horizontal: -4, vertical: -4)),
-                          child: Icon(
-                            Icons.arrow_left,
-                            color: Colors.black,
-                          ),
-                          onPressed: () => _decrementCounter(),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              currentWPLC.cbm.value.name,
-                              overflow: TextOverflow.ellipsis,
+                        // ElevatedButton(
+                        //   style: ButtonStyle(
+                        //       backgroundColor: MaterialStateProperty.all<Color>(
+                        //           Colors.white),
+                        //       visualDensity:
+                        //           VisualDensity(horizontal: -4, vertical: -4)),
+                        //   child:
+                        //   ,
+                        //   onPressed: () => _decrementCounter(),
+                        // )
+                        Expanded(
+                          flex: 1,
+                          child: GestureDetector(
+                            onTap: () => _decrementCounter(),
+                            child: Icon(
+                              Icons.arrow_left,
+                              color: Colors.white,
+                              size: 25,
                             ),
-                            Text(
-                              currentWPLC.cwpm.value.name.capitalize!,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          ],
-                        ),
-                        ElevatedButton(
-                          child: Icon(
-                            Icons.arrow_right,
-                            color: Colors.black,
                           ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.white),
-                              visualDensity:
-                                  VisualDensity(horizontal: -4, vertical: -4)),
-                          onPressed: () => _incrementCounter(),
-                        )
+                        ),
+                        Expanded(
+                          flex: 10,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                currentWPLC.cbm.value.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                currentWPLC.cwpm.value.name.capitalize!,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: GestureDetector(
+                            onTap: () => _incrementCounter(),
+                            child: Icon(
+                              Icons.arrow_right,
+                              color: Colors.white,
+                              size: 25,
+                            ),
+                          ),
+                        ),
+                        // ElevatedButton(
+                        //   child: Icon(
+                        //     Icons.arrow_right,
+                        //     color: Colors.black,
+                        //   ),
+                        //   style: ButtonStyle(
+                        //       backgroundColor: MaterialStateProperty.all<Color>(
+                        //           Colors.white),
+                        //       visualDensity:
+                        //           VisualDensity(horizontal: -4, vertical: -4)),
+                        //   onPressed: () => _incrementCounter(),
+                        // )
                       ],
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
@@ -292,46 +323,124 @@ class _PtScreenState extends State<PtScreen> with TickerProviderStateMixin {
         : Obx(() => DefaultTabController(
               length: 10,
               child: Scaffold(
+                // appBar: AppBar(
+                //   title: Row(
+                //     children: [
+                //       ElevatedButton(
+                //         style: ButtonStyle(
+                //             backgroundColor:
+                //                 MaterialStateProperty.all<Color>(Colors.white),
+                //             visualDensity:
+                //                 VisualDensity(horizontal: -4, vertical: -4)),
+                //         child: Icon(
+                //           Icons.arrow_left,
+                //           color: Colors.black,
+                //         ),
+                //         onPressed: () => _decrementCounter(),
+                //       ),
+                //       Column(
+                //         mainAxisSize: MainAxisSize.min,
+                //         children: [
+                //           Text(
+                //             currentWPLC.cbm.value.name,
+                //             overflow: TextOverflow.ellipsis,
+                //           ),
+                //           Text(
+                //             currentWPLC.cwpm.value.name.capitalize!,
+                //             overflow: TextOverflow.ellipsis,
+                //           )
+                //         ],
+                //       ),
+                //       ElevatedButton(
+                //         child: Icon(
+                //           Icons.arrow_right,
+                //           color: Colors.black,
+                //         ),
+                //         style: ButtonStyle(
+                //             backgroundColor:
+                //                 MaterialStateProperty.all<Color>(Colors.white),
+                //             visualDensity:
+                //                 VisualDensity(horizontal: -4, vertical: -4)),
+                //         onPressed: () => _incrementCounter(),
+                //       )
+                //     ],
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     mainAxisSize: MainAxisSize.max,
+                //   ),
+                //   bottom: TabBar(
+                //       controller: ecController.tc3,
+                //       isScrollable: true,
+                //       unselectedLabelColor: Colors.white.withOpacity(0.3),
+                //       indicatorColor: Colors.white,
+                //       tabs: [
+                //         tabBar('Pt Details'),
+                //         tabBar('Pt Sum'),
+                //         tabBar('RER'),
+                //         tabBar('Rev/Ent'),
+                //         tabBar('Disc Entry'),
+                //         tabBar('FlowChart'),
+                //         tabBar('VsChart'),
+                //         // tabBar('Int Entry'),
+                //         tabBar('Int Note'),
+                //         tabBar('Disc Doc'),
+                //         tabBar('Imaging'),
+                //       ]),
+                // ),
                 appBar: AppBar(
+                  leading: GestureDetector(
+                    onTap: () => Get.back(),
+                    child: Icon(
+                      Icons.cancel_outlined,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  ),
                   title: Row(
                     children: [
-                      ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.white),
-                            visualDensity:
-                                VisualDensity(horizontal: -4, vertical: -4)),
-                        child: Icon(
-                          Icons.arrow_left,
-                          color: Colors.black,
-                        ),
-                        onPressed: () => _decrementCounter(),
+                      Expanded(
+                        flex: 2,
+                        child: GestureDetector(
+                            onTap: () => _decrementCounter(),
+                            child: Container(
+                              // alignment: Alignment.centerLeft, // no use
+                                decoration: BoxDecoration(color: Colors.red),
+                                child: Icon(
+                                  Icons.arrow_circle_left,
+                                  color: Colors.white,
+                                  size: 32,
+                                ))),
                       ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            currentWPLC.cbm.value.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            currentWPLC.cwpm.value.name.capitalize!,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        ],
-                      ),
-                      ElevatedButton(
-                        child: Icon(
-                          Icons.arrow_right,
-                          color: Colors.black,
+                      Expanded(
+                        flex: 15,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              currentWPLC.cbm.value.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              currentWPLC.cwpm.value.name.capitalize!,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          ],
                         ),
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.white),
-                            visualDensity:
-                                VisualDensity(horizontal: -4, vertical: -4)),
-                        onPressed: () => _incrementCounter(),
-                      )
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: GestureDetector(
+                            onTap: () => _incrementCounter(),
+                            child: Container(
+                              // alignment: Alignment.centerRight,
+                              decoration: BoxDecoration(color: Colors.red),
+                              child: 
+                              Icon(
+                                Icons.arrow_circle_right,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                            )),
+                      ),
                     ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,

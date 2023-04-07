@@ -102,15 +102,17 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       title: 'MaHospital',
       theme: ThemeData(
-        scaffoldBackgroundColor: light,
-        textTheme: GoogleFonts.mulishTextTheme(Theme.of(context).textTheme)
-            .apply(bodyColor: Colors.black),
-        pageTransitionsTheme: PageTransitionsTheme(builders: {
-          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-        }),
-        primarySwatch: Colors.blue,
-      ),
+          scaffoldBackgroundColor: light,
+          textTheme: GoogleFonts.mulishTextTheme(Theme.of(context).textTheme)
+              .apply(bodyColor: Colors.black),
+          pageTransitionsTheme: PageTransitionsTheme(builders: {
+            TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          }),
+          primarySwatch: Colors.blue,
+          // primaryTextTheme: TextTheme(bodyMedium: TextStyle(fontSize: 20.0))
+          highlightColor: Colors.black
+          ),
       // home: Root(),
     );
     // return MultiProvider(

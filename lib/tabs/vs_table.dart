@@ -1,4 +1,5 @@
 // import 'dart:ffi';
+// sdkfhjks
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -48,14 +49,15 @@ class _VsTableState extends State<VsTable> {
     sctrl = ScrollController(keepScrollOffset: true);
     sctrl.addListener(slistener);
     ff = teamsData;
-    vitalsTitle.asMap().forEach((i, v) => vsList.add(
-        VsTextField(v, sendDataMap, saveData)));
+    vitalsTitle
+        .asMap()
+        .forEach((i, v) => vsList.add(VsTextField(v, sendDataMap, saveData)));
     selectedDate = DateTime.now();
     selectedTime = TimeOfDay.now();
     dobCont.text = DateFormat('dd/MM/yyyy').format(selectedDate);
     print(dobCont.text);
     print(DateFormat.Hms().format(selectedDate));
-    timeCont.text = DateFormat.jm().format(selectedDate); 
+    timeCont.text = DateFormat.jm().format(selectedDate);
     // selectedTime.hour.toString() + ':' + selectedTime.minute.toString(); // get hour and minute and put into date time
     super.initState();
   }
@@ -133,7 +135,7 @@ class _VsTableState extends State<VsTable> {
         drawn: 2,
         lost: 0,
         against: 4,
-        gd: 3),
+        gd: 'skjdlfksjlfjsfdhkjshfjsfkj skjfhsjkfhksdjf sdkfjhsjkfs kjfhskjfh sdfhksjhfksjksjhsfk sdkjfhkdsfhkjsdhf sdkfhdshfkdshfk sdfkjhdskfhsd skdfsfksdj sdkfhjksdfhksd limit here better ba, sdkjfhsdhfkjsd aaaaaaaaaaaajklalk'),
     Team(
         position: 2,
         name: 'Real',
@@ -143,7 +145,7 @@ class _VsTableState extends State<VsTable> {
         drawn: 1,
         lost: 0,
         against: 6,
-        gd: 7),
+        gd: 'skjdlfksjlfjs'),
     Team(
         position: 3,
         name: 'Valencia',
@@ -153,7 +155,7 @@ class _VsTableState extends State<VsTable> {
         drawn: 2,
         lost: 0,
         against: 2,
-        gd: 7),
+        gd: 'skjdlfksjlfjs'),
     Team(
         position: 4,
         name: 'Athletic',
@@ -163,7 +165,7 @@ class _VsTableState extends State<VsTable> {
         drawn: 3,
         lost: 0,
         against: 1,
-        gd: 3),
+        gd: 'skjdlfksjlfjs'),
     Team(
         position: 5,
         name: 'Real',
@@ -173,157 +175,157 @@ class _VsTableState extends State<VsTable> {
         drawn: 0,
         lost: 1,
         against: 4,
-        gd: 2),
-    Team(
-        position: 6,
-        name: 'Osasuna',
-        points: 8,
-        played: 5,
-        won: 2,
-        drawn: 2,
-        lost: 1,
-        against: 6,
-        gd: 0),
-    Team(
-        position: 7,
-        name: 'Mallorca',
-        points: 8,
-        played: 5,
-        won: 2,
-        drawn: 2,
-        lost: 1,
-        against: 3,
-        gd: 0),
-    Team(
-        position: 8,
-        name: 'Sevilla',
-        points: 7,
-        played: 3,
-        won: 2,
-        drawn: 1,
-        lost: 0,
-        against: 1,
-        gd: 4),
-    Team(
-        position: 9,
-        name: 'Rayo',
-        points: 7,
-        played: 5,
-        won: 2,
-        drawn: 1,
-        lost: 2,
-        against: 5,
-        gd: 3),
-    Team(
-        position: 10,
-        name: 'Barcelona',
-        points: 7,
-        played: 3,
-        won: 2,
-        drawn: 1,
-        lost: 0,
-        against: 4,
-        gd: 3),
-    Team(
-        position: 11,
-        name: 'Elche',
-        points: 6,
-        played: 5,
-        won: 1,
-        drawn: 3,
-        lost: 1,
-        against: 3,
-        gd: 0),
-    Team(
-        position: 12,
-        name: 'Real',
-        points: 5,
-        played: 4,
-        won: 1,
-        drawn: 2,
-        lost: 1,
-        against: 4,
-        gd: 0),
-    Team(
-        position: 13,
-        name: 'Cadiz',
-        points: 5,
-        played: 5,
-        won: 1,
-        drawn: 2,
-        lost: 2,
-        against: 8,
-        gd: -2),
-    Team(
-        position: 14,
-        name: 'Villarreal',
-        points: 4,
-        played: 4,
-        won: 0,
-        drawn: 4,
-        lost: 0,
-        against: 2,
-        gd: 0),
-    Team(
-        position: 15,
-        name: 'Levante',
-        points: 4,
-        played: 5,
-        won: 0,
-        drawn: 4,
-        lost: 1,
-        against: 7,
-        gd: -1),
-    Team(
-        position: 16,
-        name: 'Espanyol',
-        points: 2,
-        played: 4,
-        won: 0,
-        drawn: 2,
-        lost: 2,
-        against: 3,
-        gd: -2),
-    Team(
-        position: 17,
-        name: 'Granada',
-        points: 2,
-        played: 4,
-        won: 0,
-        drawn: 2,
-        lost: 2,
-        against: 7,
-        gd: -5),
-    Team(
-        position: 18,
-        name: 'Celta',
-        points: 1,
-        played: 5,
-        won: 0,
-        drawn: 1,
-        lost: 4,
-        against: 10,
-        gd: -6),
-    Team(
-        position: 19,
-        name: 'Getafe',
-        points: 0,
-        played: 5,
-        won: 0,
-        drawn: 0,
-        lost: 5,
-        against: 8,
-        gd: -7),
-    Team(
-        position: 20,
-        name: 'Alaves',
-        points: 0,
-        played: 4,
-        won: 0,
-        drawn: 0,
-        lost: 4,
-        against: 10,
-        gd: -9),
+        gd: 'skjdlfksjlfjs'),
+    // Team(
+    //     position: 6,
+    //     name: 'Osasuna',
+    //     points: 8,
+    //     played: 5,
+    //     won: 2,
+    //     drawn: 2,
+    //     lost: 1,
+    //     against: 6,
+    //     gd: 0),
+    // Team(
+    //     position: 7,
+    //     name: 'Mallorca',
+    //     points: 8,
+    //     played: 5,
+    //     won: 2,
+    //     drawn: 2,
+    //     lost: 1,
+    //     against: 3,
+    //     gd: 0),
+    // Team(
+    //     position: 8,
+    //     name: 'Sevilla',
+    //     points: 7,
+    //     played: 3,
+    //     won: 2,
+    //     drawn: 1,
+    //     lost: 0,
+    //     against: 1,
+    //     gd: 4),
+    // Team(
+    //     position: 9,
+    //     name: 'Rayo',
+    //     points: 7,
+    //     played: 5,
+    //     won: 2,
+    //     drawn: 1,
+    //     lost: 2,
+    //     against: 5,
+    //     gd: 3),
+    // Team(
+    //     position: 10,
+    //     name: 'Barcelona',
+    //     points: 7,
+    //     played: 3,
+    //     won: 2,
+    //     drawn: 1,
+    //     lost: 0,
+    //     against: 4,
+    //     gd: 3),
+    // Team(
+    //     position: 11,
+    //     name: 'Elche',
+    //     points: 6,
+    //     played: 5,
+    //     won: 1,
+    //     drawn: 3,
+    //     lost: 1,
+    //     against: 3,
+    //     gd: 0),
+    // Team(
+    //     position: 12,
+    //     name: 'Real',
+    //     points: 5,
+    //     played: 4,
+    //     won: 1,
+    //     drawn: 2,
+    //     lost: 1,
+    //     against: 4,
+    //     gd: 0),
+    // Team(
+    //     position: 13,
+    //     name: 'Cadiz',
+    //     points: 5,
+    //     played: 5,
+    //     won: 1,
+    //     drawn: 2,
+    //     lost: 2,
+    //     against: 8,
+    //     gd: -2),
+    // Team(
+    //     position: 14,
+    //     name: 'Villarreal',
+    //     points: 4,
+    //     played: 4,
+    //     won: 0,
+    //     drawn: 4,
+    //     lost: 0,
+    //     against: 2,
+    //     gd: 0),
+    // Team(
+    //     position: 15,
+    //     name: 'Levante',
+    //     points: 4,
+    //     played: 5,
+    //     won: 0,
+    //     drawn: 4,
+    //     lost: 1,
+    //     against: 7,
+    //     gd: -1),
+    // Team(
+    //     position: 16,
+    //     name: 'Espanyol',
+    //     points: 2,
+    //     played: 4,
+    //     won: 0,
+    //     drawn: 2,
+    //     lost: 2,
+    //     against: 3,
+    //     gd: -2),
+    // Team(
+    //     position: 17,
+    //     name: 'Granada',
+    //     points: 2,
+    //     played: 4,
+    //     won: 0,
+    //     drawn: 2,
+    //     lost: 2,
+    //     against: 7,
+    //     gd: -5),
+    // Team(
+    //     position: 18,
+    //     name: 'Celta',
+    //     points: 1,
+    //     played: 5,
+    //     won: 0,
+    //     drawn: 1,
+    //     lost: 4,
+    //     against: 10,
+    //     gd: -6),
+    // Team(
+    //     position: 19,
+    //     name: 'Getafe',
+    //     points: 0,
+    //     played: 5,
+    //     won: 0,
+    //     drawn: 0,
+    //     lost: 5,
+    //     against: 8,
+    //     gd: -7),
+    // Team(
+    //     position: 20,
+    //     name: 'Alaves',
+    //     points: 0,
+    //     played: 4,
+    //     won: 0,
+    //     drawn: 0,
+    //     lost: 4,
+    //     against: 10,
+    //     gd: -9),
   ];
 
   Expanded rightSide() {
@@ -345,17 +347,16 @@ class _VsTableState extends State<VsTable> {
             ),
             columns: [
               DataColumn(
-                  label: SizedBox(
-                      width: 60, child: Center(child: Text('HR')))),
+                  label: SizedBox(width: 60, child: Center(child: Text('HR')))),
+              DataColumn(label: Text('BP')),
               DataColumn(label: Text('RR')),
               DataColumn(label: Text('SpO2')),
-              DataColumn(label: Text('Temp')),
-              DataColumn(
-                  label: SizedBox(
-                      width: 110, child: Center(child: Text('BP')))),
               DataColumn(
                   label:
-                      SizedBox(width: 260, child: Center(child: Text('Notes')))),
+                      SizedBox(width: 110, child: Center(child: Text('Temp')))),
+              DataColumn(
+                  label: SizedBox(
+                      width: 260, child: Center(child: Text('Notes')))),
             ],
             rows: [
               ...ff.map((team) => DataRow(
@@ -458,7 +459,8 @@ class _VsTableState extends State<VsTable> {
             padding: const EdgeInsets.all(3.0),
             child: Scrollbar(
               scrollbarOrientation: ScrollbarOrientation.bottom,
-              isAlwaysShown: true,
+              thumbVisibility: true,
+              // isAlwaysShown: true,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -502,7 +504,7 @@ class _VsTableState extends State<VsTable> {
                           decoration: InputDecoration(
                             isDense: true,
                             // contentPadding:
-                                // EdgeInsets.zero,
+                            // EdgeInsets.zero,
                             labelText: 'Time',
                             prefixIcon: IconButton(
                               icon: Icon(Icons.access_time),
@@ -514,7 +516,7 @@ class _VsTableState extends State<VsTable> {
                             ),
                           ),
                         )),
-                    ...vsList,
+                    ...vsList, // for "textInputAction: TextInputAction.next", need to put in a Form()?
                     Container(
                       // constraints: BoxConstraints(maxWidth: 50), // why cant use ConstrainedBox ??
                       padding:
@@ -553,15 +555,18 @@ class _VsTableState extends State<VsTable> {
           ),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            controller: sctrl,
-            child: Row(
-              children: [
-                leftSide(),
-                rightSide(),
-              ],
-            ),
-          ),
+          child: Scrollbar(
+              scrollbarOrientation: ScrollbarOrientation.bottom,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: sctrl,
+                child: Row(
+                  children: [
+                    leftSide(),
+                    rightSide(),
+                  ],
+                ),
+              )),
         )
       ],
     );
@@ -595,7 +600,7 @@ class Team {
   final int drawn;
   final int lost;
   final int against;
-  final int gd;
+  final String gd;
 }
 
 class VsTextField extends StatelessWidget {

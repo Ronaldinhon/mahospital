@@ -18,7 +18,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import 'package:google_ml_kit/google_ml_kit.dart';
+// import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:mahospital/cameras/extract_text_camera.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
@@ -94,8 +95,9 @@ class _BedScreenState extends State<BedScreen> {
   late List<CameraDescription> cameras;
   late String imagePath;
   final picker = ImagePicker();
-  late RecognisedText regText;
-  TextDetector _textDetector = GoogleMlKit.vision.textDetector();
+  late RecognizedText regText;
+  TextRecognizer _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  // GoogleMlKit.vision.textRecognizer();
 
   // PersistentBottomSheetController _controllerMTFK;
   // final _formKey2 = GlobalKey<FormState>();
@@ -520,7 +522,7 @@ class _BedScreenState extends State<BedScreen> {
   Future<void> interpret(String path) async {
     // if (path != null) {
     var inputImage = InputImage.fromFilePath(path);
-    regText = await _textDetector.processImage(inputImage);
+    regText = await _textRecognizer.processImage(inputImage);
     localCont.text = regText.text;
 
     LineSplitter.split(regText.text).forEach((line) => regexIt(line));

@@ -83,7 +83,7 @@ class FcPdfState extends State<FcPdf> {
   @override
   void initState() {
     // createDoc();
-    separateParam = (bloodParam.length / 16).ceil();
+    separateParam = (bloodParam.length / 15).ceil();
     // sample..addAll(currentWPLC.currentBML);
     if (ecController.numberOfDays != 0) {
       headerDatesInt = partition(ecController.orderedDateTime, 11);
@@ -104,9 +104,10 @@ class FcPdfState extends State<FcPdf> {
     keyPair = await getKeyPair();
     // RSAPrivateKey privateKey = keyPair.privateKey as RSAPrivateKey;
     var help = RsaKeyHelper();
-    var pr =
+    String pr =
         help.encodePrivateKeyToPemPKCS1(keyPair.privateKey as RSAPrivateKey);
-    var pub = help.encodePublicKeyToPemPKCS1(keyPair.publicKey as RSAPublicKey);
+    String pub = help.encodePublicKeyToPemPKCS1(keyPair.publicKey as RSAPublicKey);
+    // the 2 lines above - saving private and pu
     var enc = encrypt('Stanley baby', help.parsePublicKeyFromPem(pub));
     var dec = decrypt(enc, help.parsePrivateKeyFromPem(pr));
     print(enc);
@@ -122,6 +123,7 @@ class FcPdfState extends State<FcPdf> {
       getKeyPair() async {
     var helper = RsaKeyHelper();
     return await helper.computeRSAKeyPair(helper.getSecureRandom());
+    // pointycastle as return type but return value from rsa_encrypt 
   }
 
   List<pw.Widget> _getTitleWidget(int ii) {
@@ -163,9 +165,9 @@ class FcPdfState extends State<FcPdf> {
 
   List<pw.Widget> buildLines(int ii, int pp) {
     List<pw.Widget> lines = [];
-    var last = (pp * 16) + 15;
+    var last = (pp * 15) + 15;
     for (String bp in bloodParam.sublist(
-        pp * 16, last >= bloodParam.length ? bloodParam.length : last)) {
+        pp * 15, last >= bloodParam.length ? bloodParam.length : last)) {
       List<pw.Widget> innerLines = [];
       innerLines.add(pw.Container(
         child: pw.Column(

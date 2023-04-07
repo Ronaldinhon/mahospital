@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 import 'package:mahospital/constants/controllers.dart';
@@ -33,47 +34,18 @@ class _FcEntryState extends State<FcEntry> {
     'Cl',
     'Urea',
     'Creat',
-    // 'Hb',
-    // 'Hct',
-    // 'MCV',
-    // 'MCH',
-    // 'Plt',
-    // 'Twc',
-    // 'PMN',
-    // 'Lymph',
-    // 'Eos',
-    // 'Mono',
-    // 'Urea',
-    // 'Creat',
-    // 'Na',
-    // 'K',
-    // 'Cl',
-    // 'Ca',
-    // 'Phos',
-    // 'Mg',
-    // 'TBil',
-    // 'Dir',
-    // 'Indir',
-    // 'Pro',
-    // 'Alb',
-    // 'Glob',
-    // 'ALT',
-    // 'ALP',
-    // 'CK',
-    // 'AST',
-    // 'LDH',
-    // 'PT',
-    // 'APTT',
-    // 'INR',
-    // 'ESR',
-    // 'CRP',
-    // 'T4',
-    // 'TSH',
-    // 'ferri',
-    // 'iron',
-    // 'UIBC',
-    // 'TIBC',
-    // 'Tr.Sat',
+    'TProt',
+    'Alb',
+    'Glob',
+    'TBil',
+    'ALT',
+    'AST',
+    'ALP',
+    'Ca', // watchout
+    'Phos',
+    'Mg',
+    'CK',
+    'LDH',
   ];
 
   // how to deal with data change in appwrite??
@@ -104,17 +76,17 @@ class _FcEntryState extends State<FcEntry> {
   Map<String, dynamic> initialMap = {};
   // i think just make it into a Map
   bool loading = false;
-  final bloodList = [
-    'Hb',
-    'Twc',
-    'Hct',
-    'Plt',
-    'Na',
-    'K',
-    'Cl',
-    'Urea',
-    'Creat'
-  ];
+  // final bloodList = [
+  //   'Hb',
+  //   'Twc',
+  //   'Hct',
+  //   'Plt',
+  //   'Na',
+  //   'K',
+  //   'Cl',
+  //   'Urea',
+  //   'Creat'
+  // ];
 
   _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -167,9 +139,11 @@ class _FcEntryState extends State<FcEntry> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ElevatedButton(
-                      child: Text('<- Back'),
-                      onPressed: () => ecController.entryFC.value = false,
-                    ),
+                        child: Text('<- Back'),
+                        onPressed: () {
+                          ecController.editFcEntry.value = false;
+                          ecController.entryFC.value = false;
+                        }),
                   ],
                 ),
                 Text(
@@ -231,7 +205,7 @@ class _FcEntryState extends State<FcEntry> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text('Fill in / Overrride camera results',
+                    Text('Fill in / Override camera results',
                         style: TextStyle(fontSize: 8))
                   ],
                 ),
@@ -319,16 +293,71 @@ class BpTextField extends StatelessWidget {
   BpTextField(this.paramName, this.iniMap);
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      scrollPadding: EdgeInsets.all(5),
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.next,
-      decoration: InputDecoration(
-        labelText: paramName,
-      ),
-      onSaved: (val) {
-        if (val != null) iniMap[paramName] = val;
-      },
-    );
+    return Obx(() {
+      double val = double.tryParse(ecController.ixResults[paramName]) ?? 0;
+      Color? col = (val < -1) || (val > 41) ? Colors.red : null;
+
+      return TextFormField(
+        scrollPadding: EdgeInsets.all(5),
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.next,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'(^\-?(\d+)?\.?\d{0,2})'))
+        ],
+        decoration: InputDecoration(
+            labelText: paramName,
+            labelStyle: TextStyle(color: col),
+            suffixText: 'mg/dl'),
+        initialValue: ecController.ixResults[paramName] ?? '',
+        onChanged: (str) => ecController.ixResults[paramName] = str,
+        // try change value using initialValue
+        onSaved: (val) {
+          if (val != null) iniMap[paramName] = val;
+        },
+        validator: PatternValidator(RegExp(r'(^\-?(\d+)?\.?\d{0,2})'), errorText: 'Not number'),
+      );
+    });
   }
 }
+
+// 'Hb',
+// 'Hct',
+// 'MCV',
+// 'MCH',
+// 'Plt',
+// 'Twc',
+// 'PMN',
+// 'Lymph',
+// 'Eos',
+// 'Mono',
+// 'Urea',
+// 'Creat',
+// 'Na',
+// 'K',
+// 'Cl',
+// 'Ca',
+// 'Phos',
+// 'Mg',
+// 'TBil',
+// 'Dir',
+// 'Indir',
+// 'Pro',
+// 'Alb',
+// 'Glob',
+// 'ALT',
+// 'ALP',
+// 'CK',
+// 'AST',
+// 'LDH',
+// 'PT',
+// 'APTT',
+// 'INR',
+// 'ESR',
+// 'CRP',
+// 'T4',
+// 'TSH',
+// 'ferri',
+// 'iron',
+// 'UIBC',
+// 'TIBC',
+// 'Tr.Sat',

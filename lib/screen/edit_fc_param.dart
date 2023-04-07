@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+// import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:mahospital/constants/controllers.dart';
 import 'package:mahospital/constants/firebase.dart';
 
@@ -20,8 +21,9 @@ class _EditFcParamState extends State<EditFcParam> {
   final localCont = TextEditingController();
   late CameraDescription camera;
   late List<CameraDescription> cameras;
-  late RecognisedText regText;
-  TextDetector _textDetector = GoogleMlKit.vision.textDetector();
+  late RecognizedText regText;
+  TextRecognizer _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  // GoogleMlKit.vision.textRecognizer();
   List<String> bloodParam = [
     'Hb',
     'Hct',
@@ -65,7 +67,7 @@ class _EditFcParamState extends State<EditFcParam> {
   Future<void> interpret(String path) async {
     // if (path != null) {
     var inputImage = InputImage.fromFilePath(path);
-    regText = await _textDetector.processImage(inputImage);
+    regText = await _textRecognizer.processImage(inputImage);
     localCont.text = regText.text;
 
     // LineSplitter.split(regText.text).forEach((line) => regexIt(line));
@@ -78,115 +80,120 @@ class _EditFcParamState extends State<EditFcParam> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Container(
-          height: 55,
-          width: MediaQuery.of(context).size.width,
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  child: Text('Back'),
-                  onPressed: () => ecController.editFCparam.value = false,
-                ),
-                IconButton(
-                  icon: Icon(Icons.camera_alt),
-                  onPressed: () async {
-                    imagePath = await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (c) {
-                          return ExtractTextCamera(
-                              camera, false); // need to change
-                        },
-                      ),
-                    );
-                    interpret(imagePath);
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.save),
-                  onPressed: () {
-                    _formKey.currentState!.save();
-                    ecController.editFCparam.value = false;
-                  },
-                )
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: bloodParam
-                  .map((bp) => ParamListTile(bp, ecController.ecCorrespondKeys,
-                      ecController.ecIdenTexts, localCont))
-                  .toList(),
-            ),
-          ),
-        )
-      ]),
-      bottomSheet: Container(
-        height: bottomHeight,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: RichText(
-                    text: TextSpan(
-                      style: TextStyle(color: Colors.red, fontSize: 10),
-                      children: [
-                        TextSpan(text: '* click, highlight and '),
-                        WidgetSpan(
-                          child: Icon(Icons.paste, size: 10, color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.cancel),
-                  onPressed: () {
-                    setState(() {
-                      bottomHeight = 0;
-                    });
-                  },
-                )
-              ],
-            ),
-            Container(
-              padding: EdgeInsets.all(6.0),
-              constraints: BoxConstraints(maxHeight: 130),
-              child: SingleChildScrollView(
-                child: TextFormField(
-                  controller: localCont,
-                  decoration: InputDecoration(
-                    labelText: 'Magic',
-                    contentPadding: EdgeInsets.all(10.0),
-                  ),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  readOnly: true,
-                  showCursor: true,
-                  toolbarOptions: ToolbarOptions(
-                    selectAll: false,
-                    copy: false,
-                    cut: false,
-                    paste: false,
-                  ),
-                ),
+    return
+        // Scaffold(
+        //   body:
+        // interesting... if use scaffold, first widget is fixed in position inside column
+        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      Container(
+        height: 55,
+        width: MediaQuery.of(context).size.width,
+        child: Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                child: Text('Back'),
+                onPressed: () => ecController.editFCparam.value = false,
               ),
-            ),
-          ],
+              IconButton(
+                icon: Icon(Icons.camera_alt),
+                onPressed: () async {
+                  imagePath = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (c) {
+                        return ExtractTextCamera(
+                            camera, false); // need to change
+                      },
+                    ),
+                  );
+                  interpret(imagePath);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.save),
+                onPressed: () {
+                  _formKey.currentState!.save();
+                  ecController.editFCparam.value = false;
+                },
+              )
+            ],
+          ),
         ),
       ),
-    );
+      Expanded(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: bloodParam
+                .map((bp) => ParamListTile(bp, ecController.ecCorrespondKeys,
+                    ecController.ecIdenTexts, localCont))
+                .toList(),
+          ),
+        ),
+      )
+    ])
+        // ,
+        // bottomSheet: Container(
+        //   height: bottomHeight,
+        //   child: Column(
+        //     children: [
+        //       Row(
+        //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //         children: [
+        //           Padding(
+        //             padding: const EdgeInsets.only(left: 8.0),
+        //             child: RichText(
+        //               text: TextSpan(
+        //                 style: TextStyle(color: Colors.red, fontSize: 10),
+        //                 children: [
+        //                   TextSpan(text: '* click, highlight and '),
+        //                   WidgetSpan(
+        //                     child: Icon(Icons.paste, size: 10, color: Colors.red),
+        //                   ),
+        //                 ],
+        //               ),
+        //             ),
+        //           ),
+        //           IconButton(
+        //             icon: Icon(Icons.cancel),
+        //             onPressed: () {
+        //               setState(() {
+        //                 bottomHeight = 0;
+        //               });
+        //             },
+        //           )
+        //         ],
+        //       ),
+        //       Container(
+        //         padding: EdgeInsets.all(6.0),
+        //         constraints: BoxConstraints(maxHeight: 130),
+        //         child: SingleChildScrollView(
+        //           child: TextFormField(
+        //             controller: localCont,
+        //             decoration: InputDecoration(
+        //               labelText: 'Magic',
+        //               contentPadding: EdgeInsets.all(10.0),
+        //             ),
+        //             keyboardType: TextInputType.multiline,
+        //             maxLines: null,
+        //             readOnly: true,
+        //             showCursor: true,
+        //             toolbarOptions: ToolbarOptions(
+        //               selectAll: false,
+        //               copy: false,
+        //               cut: false,
+        //               paste: false,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // )
+        ;
   }
 }
 

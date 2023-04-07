@@ -322,6 +322,9 @@ class _DiscDocState extends State<DiscDoc> {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('3. MRN'),
+                        pw.Text(
+                            '3. MRN lskjfs fhf f fh fhf sfslkjslkl', overflow: pw.TextOverflow.visible),
+                        // still disappears - need to try latest version - but in 2 column space no disappearing anymore
                       ])),
               pw.Container(
                   padding: pw.EdgeInsets.all(5),
@@ -899,6 +902,8 @@ class _DiscDocState extends State<DiscDoc> {
                       width: 1,
                     ),
                   ),
+                  child: pw.Text(
+                      '3. MRN lskjfsjlfjslfjsfjsjflsjflsjflkjflskjflsjflsjf sjlsdjflsjdfljs f lsdfjlsdjflsj slfjslfjsdl slfjslkjlksjfs 3. MRN lskjfsjlfjslfjsfjsjflsjflsjflkjflskjflsjflsjf sjlsdjflsjdfljs f lsdfjlsdjflsj slfjslfjsdl slfjslkjlksjfs'),
                 ),
                 pw.Container(
                   width: 210,
@@ -1564,25 +1569,33 @@ class _DiscDocState extends State<DiscDoc> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 50,
-          child: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: ElevatedButton(
-              child: Text('Back'),
-              onPressed: () => ecController.printingDisc.value = false,
-            ),
-          ),
-        ),
-        Expanded(
-          child: PdfPreview(
-            build: (format) => pdf.save(),
-          ),
-        )
-      ],
+    return Scaffold(
+      appBar: AppBar(),
+      body: PdfPreview(
+        build: (format) => pdf.save(),
+        onPrinted: (ctx){},
+      ),
+      //     child: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.center,
+      //   children: [
+      //     SizedBox(
+      //       height: 50,
+      //       child: Padding(
+      //         padding: const EdgeInsets.all(6.0),
+      //         child: ElevatedButton(
+      //           child: Text('Back'),
+      //           onPressed: () => ecController.printingDisc.value = false,
+      //         ),
+      //       ),
+      //     ),
+      //     Expanded(
+      //       child:
+      //       PdfPreview(
+      //         build: (format) => pdf.save(),
+      //       ),
+      //     )
+      //   ],
+      // ),
     );
   }
 }
